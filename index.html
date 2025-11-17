@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Infinity Octave Terminal</title>
+
+<!-- Core Style -->
+<link rel="stylesheet" href="css/style.css" />
+
+<!-- Auto-loader: pulls in all JS modules safely -->
+<script>
+window.InfinityModules = {
+    loaded: {},
+    queue: [],
+    load(name) {
+        return new Promise((resolve) => {
+            if (this.loaded[name]) return resolve();
+            const s = document.createElement("script");
+            s.src = "js/" + name + ".js";
+            s.onload = () => {
+                this.loaded[name] = true;
+                resolve();
+            };
+            document.head.appendChild(s);
+        });
+    },
+    async start() {
+        await this.load("core-loader");
+    }
+};
+</script>
+</head>
+
+<body>
+
+<div id="app-container">
+
+    <h1 class="header-title">Infinity Octave OS — Terminal v1</h1>
+
+    <!-- Top Button Dashboard -->
+    <div id="button-bar">
+        <button class="ui-btn" data-mode="chat">Conversate</button>
+        <button class="ui-btn" data-mode="secret">Secret Encode</button>
+        <button class="ui-btn" data-mode="retrieve">Retrieve</button>
+        <button class="ui-btn" data-mode="builder">Builder</button>
+        <button class="ui-btn" data-mode="post">Post</button>
+        <button class="ui-btn" data-mode="wallet">Wallet</button>
+    </div>
+
+    <!-- Unified Terminal Output -->
+    <div id="terminal-output"></div>
+
+    <!-- Input Line -->
+    <div id="input-area">
+        <span class="prompt">&gt;</span>
+        <input id="terminal-input" type="text" autocomplete="off"
+               placeholder="Type here and press Enter..." />
+    </div>
+
+</div>
+
+<!-- Start runtime -->
+<script>
+InfinityModules.start();
+</script>
+
+</body>
+  </html>
+  
