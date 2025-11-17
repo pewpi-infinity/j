@@ -1,166 +1,673 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Infinity Octave OS — Terminal v1</title>
+  <meta charset="UTF-8" />
+  <title>Infinity Octave OS — Terminal v1</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<style>
+  <style>
+    :root {
+      --bg-main: #020617;
+      --bg-gradient-top: #050b18;
+      --bg-gradient-bottom: #01010a;
+
+      --glass-bg: rgba(8, 20, 40, 0.75);
+      --glass-border: rgba(70, 160, 255, 0.75);
+      --glass-shadow: 0 0 24px rgba(0, 170, 255, 0.35);
+
+      --text-main: #e5f2ff;
+      --text-soft: #9fb3d5;
+      --accent-cyan: #3ad5ff;
+      --accent-blue: #4da3ff;
+
+      --button-bg: rgba(10, 40, 80, 0.9);
+      --button-border: rgba(90, 190, 255, 0.9);
+      --button-active-bg: rgba(30, 80, 140, 0.95);
+      --button-active-glow: 0 0 18px rgba(64, 196, 255, 0.9);
+
+      --input-bg: #040826;
+      --input-border: rgba(88, 189, 255, 0.9);
+      --prompt-color: #22d3ee;
+
+      /* Infinity palette */
+      --inf-purple: #a855ff;
+      --inf-green: #22c55e;
+      --inf-blue: #38bdf8;
+      --inf-red: #f97373;
+      --inf-orange: #fb923c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
-        margin: 0;
-        padding: 0;
-        background: #0a0f1a;
-        color: #e6ecff;
-        font-family: "Inter", sans-serif;
-    }
-    h1 {
-        font-size: 2.4rem;
-        font-weight: 700;
-        text-align: center;
-        margin-top: 20px;
-        color: #8ac4ff;
-        text-shadow: 0 0 10px #0040ff;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, var(--bg-gradient-top) 0%, var(--bg-gradient-bottom) 60%, #000 100%);
+      color: var(--text-main);
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 16px;
     }
 
-    #buttonBar {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        margin: 20px;
-        flex-wrap: wrap;
+    .page {
+      width: 100%;
+      max-width: 960px;
+      margin: auto;
     }
 
-    .btn {
-        padding: 10px 18px;
-        border: 1px solid #35cfff;
-        background: rgba(0, 50, 100, 0.4);
-        color: #bde9ff;
-        border-radius: 6px;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: 0.25s;
-    }
-    .btn:hover {
-        background: rgba(0, 80, 160, 0.7);
-        color: #fff;
-        box-shadow: 0 0 10px #35cfff;
+    header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      gap: 12px;
     }
 
-    #terminal {
-        width: 95%;
-        margin: auto;
-        padding: 15px;
-        min-height: 300px;
-        border-radius: 8px;
-        background: rgba(0, 0, 0, 0.6);
-        color: #aee2ff;
-        font-size: 1.1rem;
-        line-height: 1.5rem;
-        overflow-y: auto;
-        white-space: pre-wrap;
-        border: 1px solid #1b3b5f;
-        box-shadow: inset 0 0 10px #001f3f;
+    header .brand {
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      color: var(--accent-cyan);
     }
 
-    #inputLine {
-        margin: 20px auto;
-        width: 90%;
-        display: flex;
-        align-items: center;
-        gap: 10px;
+    header .brand span {
+      opacity: 0.7;
+      font-weight: 500;
     }
 
-    #cmdPrefix {
-        font-size: 1.3rem;
-        color: #35cfff;
+    header a.portal-link {
+      font-size: 0.8rem;
+      text-decoration: none;
+      color: var(--text-soft);
+      opacity: 0.8;
     }
 
-    #cmd {
-        flex: 1;
-        padding: 10px;
-        border-radius: 6px;
-        font-size: 1.1rem;
-        border: 1px solid #2f6eff;
-        background: rgba(0, 0, 40, 0.6);
-        color: #e6ecff;
-        outline: none;
+    header a.portal-link:hover {
+      color: var(--accent-cyan);
+      opacity: 1;
     }
 
-    /* Infinity Dock */
-    #dock {
-        position: fixed;
-        bottom: 15px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #171d2e;
-        border: 1px solid #35cfff;
-        border-radius: 14px;
-        padding: 12px 20px;
-        display: flex;
-        gap: 10px;
-        box-shadow: 0 0 10px #102030;
+    .title-block {
+      text-align: center;
+      margin-bottom: 10px;
     }
 
-    .dock-btn {
-        padding: 8px 12px;
-        border-radius: 6px;
-        background: #0f1625;
-        border: 1px solid #446bff;
-        font-size: 0.8rem;
-        color: #b7d9ff;
-        cursor: pointer;
-        transition: 0.25s;
+    .title-block h1 {
+      font-size: 2.1rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #c0dcff;
+      text-shadow: 0 0 32px rgba(59, 130, 246, 0.75);
     }
-    .dock-btn:hover {
-        background: #1b2d4a;
-        color: white;
-        box-shadow: 0 0 8px #446bff;
+
+    .title-block h2 {
+      margin-top: 4px;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-soft);
     }
-</style>
+
+    .terminal-shell {
+      margin-top: 18px;
+      background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.25), transparent 50%),
+                  radial-gradient(circle at bottom right, rgba(8, 47, 73, 0.35), transparent 55%);
+      border-radius: 22px;
+      padding: 2px;
+      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.95);
+    }
+
+    .terminal-inner {
+      background: var(--glass-bg);
+      border-radius: 20px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      backdrop-filter: blur(22px);
+      padding: 14px 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .mode-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 6px;
+    }
+
+    .mode-button {
+      border-radius: 999px;
+      border: 1px solid var(--button-border);
+      background: var(--button-bg);
+      color: var(--text-main);
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease,
+        border-color 0.15s ease, color 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .mode-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 14px rgba(59, 130, 246, 0.85);
+    }
+
+    .mode-button.active {
+      background: var(--button-active-bg);
+      box-shadow: var(--button-active-glow);
+      border-color: #7dd3fc;
+      color: #e0f2fe;
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      padding: 0 2px;
+    }
+
+    .status-row span strong {
+      color: var(--accent-cyan);
+    }
+
+    .status-wallet {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+    }
+
+    .status-wallet-label {
+      opacity: 0.75;
+    }
+
+    .status-wallet-value {
+      font-weight: 600;
+      color: #bef264;
+    }
+
+    .status-wallet-currency {
+      font-size: 0.7rem;
+      color: #a5f3fc;
+    }
+
+    .console-window {
+      margin-top: 6px;
+      border-radius: 16px;
+      border: 1px solid rgba(75, 126, 210, 0.9);
+      background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.95), rgba(3, 7, 18, 0.96));
+      box-shadow: 0 0 40px rgba(15, 23, 42, 0.9);
+      padding: 12px 12px 10px;
+      min-height: 200px;
+      max-height: 360px;
+      overflow-y: auto;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .console-line {
+      margin-bottom: 4px;
+      word-wrap: break-word;
+    }
+
+    .console-line.system {
+      color: var(--text-soft);
+      opacity: 0.9;
+    }
+
+    .console-line.user {
+      color: var(--accent-cyan);
+    }
+
+    .console-line.ai {
+      color: #e0f2fe;
+    }
+
+    .console-line .label {
+      opacity: 0.7;
+      margin-right: 4px;
+    }
+
+    .color-word.inf-0 { color: var(--inf-purple); }
+    .color-word.inf-1 { color: var(--inf-green); }
+    .color-word.inf-2 { color: var(--inf-blue); }
+    .color-word.inf-3 { color: var(--inf-red); }
+    .color-word.inf-4 { color: var(--inf-orange); }
+
+    .input-row {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: nowrap;
+    }
+
+    .prompt {
+      color: var(--prompt-color);
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    #terminal-input {
+      flex: 1;
+      background: radial-gradient(circle at top, #020617, #02011a);
+      border-radius: 999px;
+      border: 1px solid var(--input-border);
+      color: #e0f2fe;
+      padding: 8px 14px;
+      font-size: 0.95rem;
+      outline: none;
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.35);
+    }
+
+    #terminal-input::placeholder {
+      color: rgba(148, 163, 184, 0.9);
+    }
+
+    #terminal-input:focus {
+      border-color: #7dd3fc;
+      box-shadow: 0 0 22px rgba(56, 189, 248, 0.7);
+    }
+
+    .post-button {
+      border-radius: 999px;
+      border: 1px solid var(--button-border);
+      background: linear-gradient(135deg, #22c55e, #22d3ee);
+      color: #022c22;
+      font-weight: 700;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      box-shadow: 0 0 18px rgba(34, 197, 94, 0.75);
+      white-space: nowrap;
+    }
+
+    .post-button:active {
+      transform: translateY(1px);
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.55);
+    }
+
+    .options-row {
+      margin-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--text-soft);
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .options-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill-toggle {
+      border-radius: 999px;
+      border: 1px solid rgba(94, 234, 212, 0.7);
+      padding: 4px 10px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      background: rgba(8, 47, 73, 0.9);
+      color: #a5f3fc;
+    }
+
+    .pill-toggle.active {
+      background: rgba(6, 95, 70, 0.9);
+      color: #bbf7d0;
+      box-shadow: 0 0 14px rgba(45, 212, 191, 0.75);
+    }
+
+    .info-panel {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.95), rgba(3, 7, 18, 0.98));
+      color: var(--text-soft);
+      font-size: 0.8rem;
+      line-height: 1.6;
+    }
+
+    .info-panel h3 {
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+      color: #c4d9ff;
+    }
+
+    .info-panel ul {
+      padding-left: 18px;
+      margin-top: 6px;
+    }
+
+    .info-panel li {
+      margin-bottom: 4px;
+    }
+
+    .color-legend span {
+      display: inline-block;
+      margin-right: 10px;
+      font-size: 0.78rem;
+    }
+
+    .color-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      margin-right: 4px;
+    }
+
+    @media (max-width: 600px) {
+      .title-block h1 {
+        font-size: 1.6rem;
+      }
+      .console-window {
+        min-height: 180px;
+        max-height: 320px;
+      }
+      .input-row {
+        flex-wrap: nowrap;
+      }
+      .post-button {
+        padding-inline: 12px;
+      }
+    }
+  </style>
 </head>
 
 <body>
+  <div class="page">
+    <header>
+      <div class="brand">INFINITY <span>Octave OS</span></div>
+      <a class="portal-link" href="https://pewpi-infinity.github.io/" target="_blank" rel="noopener">
+        ⌂ Infinity Portal
+      </a>
+    </header>
 
-<h1>Infinity Octave OS — Terminal v1</h1>
+    <div class="title-block">
+      <h1>Infinity Octave OS — Terminal v1</h1>
+      <h2>Soft-glass Neon Console for Conversations, Secrets & Builders</h2>
+    </div>
 
-<div id="buttonBar">
-    <button class="btn" onclick="OCT.cmd('conversate')">Conversate</button>
-    <button class="btn" onclick="OCT.cmd('secret')">Secret Encode</button>
-    <button class="btn" onclick="OCT.cmd('retrieve')">Retrieve</button>
-    <button class="btn" onclick="OCT.cmd('builder')">Builder</button>
-    <button class="btn" onclick="OCT.cmd('post')">Post</button>
-    <button class="btn" onclick="OCT.cmd('wallet')">Wallet</button>
-</div>
+    <section class="terminal-shell">
+      <div class="terminal-inner">
+        <div class="mode-row">
+          <button class="mode-button active" data-mode="conversate">Conversate</button>
+          <button class="mode-button" data-mode="secret">Secret Encode</button>
+          <button class="mode-button" data-mode="retrieve">Retrieve</button>
+          <button class="mode-button" data-mode="builder">Builder</button>
+          <button class="mode-button" data-mode="post">Post</button>
+          <button class="mode-button" data-mode="wallet">Wallet</button>
+        </div>
 
-<div id="terminal"></div>
+        <div class="status-row">
+          <span>Mode: <strong id="status-mode">Conversate</strong></span>
+          <div class="status-wallet">
+            <span class="status-wallet-label">∞ Tokens:</span>
+            <span class="status-wallet-value" id="wallet-balance">0</span>
+            <span class="status-wallet-currency">INF</span>
+          </div>
+        </div>
 
-<div id="inputLine">
-    <span id="cmdPrefix">&gt;</span>
-    <input id="cmd" placeholder="Type command or text..." onkeydown="OCT.handleInput(event)">
-</div>
+        <div class="console-window" id="console">
+          <div class="console-line system">
+            <span class="label">[system]</span>
+            Infinity Octave OS online. Type and press <strong>Enter</strong> or tap <strong>Post</strong>.
+          </div>
+          <div class="console-line system">
+            <span class="label">[hint]</span>
+            Type <strong>build</strong> in Builder mode to enter quick-build context.
+          </div>
+        </div>
 
+        <div class="input-row">
+          <span class="prompt">&gt;</span>
+          <input
+            id="terminal-input"
+            type="text"
+            autocomplete="off"
+            placeholder="Hello Rogers..."
+          />
+          <button class="post-button" id="post-button">Post</button>
+        </div>
 
-<!-- ======================= -->
-<!-- ALL SCRIPTS PRE-ATTACHED -->
-<!-- ======================= -->
+        <div class="options-row">
+          <div class="options-group">
+            <span>Color mode:</span>
+            <button class="pill-toggle active" data-color-mode="infinity">Infinity</button>
+            <button class="pill-toggle" data-color-mode="plain">Plain</button>
+          </div>
+          <div class="options-group">
+            <span>Every message earns tokens; big builds earn more.</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
-<script src="octave-core.js"></script>
-<script src="octave-terminal.js"></script>
-<script src="octave-commands.js"></script>
-<script src="octave-builder.js"></script>
-<script src="octave-secret.js"></script>
-<script src="octave-retrieve.js"></script>
-<script src="octave-post.js"></script>
-<script src="octave-wallet.js"></script>
-<script src="octave-ui.js"></script>
-<script src="octave-theme.js"></script>
-<script src="octave-github.js"></script>
-<script src="octave-router.js"></script>
-<script src="octave-pewpi.js"></script>
-<script src="octave-tokens.js"></script>
+    <section class="info-panel">
+      <h3>How this terminal works</h3>
+      <ul>
+        <li><strong>Conversate</strong> — simple echo chat; good for quick logging.</li>
+        <li><strong>Secret Encode</strong> — prototype PewPi-style encoding (local only).</li>
+        <li><strong>Retrieve</strong> — pulls back anything saved on this device.</li>
+        <li><strong>Builder</strong> — type <code>build</code> plus instructions for script or app ideas.</li>
+        <li><strong>Post</strong> — second send button, same as hitting Enter on mobile.</li>
+        <li><strong>Wallet</strong> — shows total tokens in this browser (saved in localStorage).</li>
+      </ul>
 
-<!-- Test script you requested -->
-<script src="frogger.js"></script>
+      <div class="color-legend" style="margin-top:10px;">
+        <span><span class="color-dot" style="background:var(--inf-purple);"></span>Purple builds connection.</span>
+        <span><span class="color-dot" style="background:var(--inf-green);"></span>Green stabilizes.</span>
+        <span><span class="color-dot" style="background:var(--inf-blue);"></span>Blue rewards.</span>
+        <span><span class="color-dot" style="background:var(--inf-red);"></span>Red reveals.</span>
+        <span><span class="color-dot" style="background:var(--inf-orange);"></span>Orange governs.</span>
+      </div>
+    </section>
+  </div>
 
+  <script>
+    (function () {
+      const consoleEl = document.getElementById("console");
+      const inputEl = document.getElementById("terminal-input");
+      const postBtn = document.getElementById("post-button");
+      const modeButtons = Array.from(document.querySelectorAll(".mode-button"));
+      const statusMode = document.getElementById("status-mode");
+      const walletBalanceEl = document.getElementById("wallet-balance");
+      const colorToggles = Array.from(document.querySelectorAll(".pill-toggle"));
+
+      let currentMode = "conversate";
+      let colorMode = "infinity";
+
+      const WALLET_KEY = "octave_wallet_balance";
+      const LOG_KEY = "octave_terminal_log";
+
+      function loadWallet() {
+        const stored = localStorage.getItem(WALLET_KEY);
+        const value = stored ? parseInt(stored, 10) || 0 : 0;
+        walletBalanceEl.textContent = value;
+        return value;
+      }
+
+      function saveWallet(value) {
+        localStorage.setItem(WALLET_KEY, String(value));
+        walletBalanceEl.textContent = value;
+      }
+
+      function bumpWallet(amount) {
+        const current = loadWallet();
+        saveWallet(current + amount);
+      }
+
+      function appendLine(role, text) {
+        const line = document.createElement("div");
+        line.classList.add("console-line", role);
+
+        const label = document.createElement("span");
+        label.classList.add("label");
+        label.textContent = role === "user" ? "[you]" :
+                            role === "ai" ? "[ai]" :
+                            "[system]";
+        line.appendChild(label);
+
+        if (colorMode === "infinity" && role !== "system") {
+          const words = text.split(/\s+/);
+          words.forEach((word, idx) => {
+            const span = document.createElement("span");
+            span.textContent = word + (idx === words.length - 1 ? "" : " ");
+            span.classList.add("color-word", "inf-" + (idx % 5));
+            line.appendChild(span);
+          });
+        } else {
+          const span = document.createElement("span");
+          span.textContent = text;
+          line.appendChild(span);
+        }
+
+        consoleEl.appendChild(line);
+        consoleEl.scrollTop = consoleEl.scrollHeight;
+        persistLog();
+      }
+
+      function encodeSecret(text) {
+        // Placeholder: simple base64 to stand in for PewPi logic.
+        try {
+          return btoa(unescape(encodeURIComponent(text)));
+        } catch {
+          return text.split("").reverse().join("");
+        }
+      }
+
+      function decodeSecret(text) {
+        try {
+          return decodeURIComponent(escape(atob(text)));
+        } catch {
+          return "(unable to decode demo secret)";
+        }
+      }
+
+      function persistLog() {
+        const lines = Array.from(consoleEl.querySelectorAll(".console-line")).map(line => ({
+          role: line.classList.contains("user")
+            ? "user"
+            : line.classList.contains("ai")
+            ? "ai"
+            : "system",
+          text: line.textContent || ""
+        }));
+        localStorage.setItem(LOG_KEY, JSON.stringify(lines));
+      }
+
+      function restoreLog() {
+        const raw = localStorage.getItem(LOG_KEY);
+        if (!raw) return;
+        try {
+          const lines = JSON.parse(raw);
+          consoleEl.innerHTML = "";
+          lines.forEach(l => {
+            const roleClass = l.role === "user" ? "user" : l.role === "ai" ? "ai" : "system";
+            appendLine(roleClass, l.text.replace(/^\[[^\]]+\]\s*/, ""));
+          });
+        } catch {
+          // ignore
+        }
+      }
+
+      function handleSubmit() {
+        const text = inputEl.value.trim();
+        if (!text) return;
+        inputEl.value = "";
+
+        appendLine("user", text);
+        bumpWallet(1);
+
+        if (currentMode === "conversate") {
+          appendLine("ai", "Echo: " + text);
+        } else if (currentMode === "secret") {
+          const encoded = encodeSecret(text);
+          appendLine("ai", "Secret stored: " + encoded);
+          bumpWallet(4);
+        } else if (currentMode === "retrieve") {
+          const stored = localStorage.getItem(LOG_KEY);
+          appendLine("ai", stored ? "Local log retrieved; scroll up to review." : "No stored log yet.");
+        } else if (currentMode === "builder") {
+          if (/^build\b/i.test(text)) {
+            appendLine(
+              "ai",
+              "Builder context armed. Use this thread to describe the app or script; Octave will later send it to the generator."
+            );
+            bumpWallet(10);
+          } else {
+            appendLine(
+              "ai",
+              "Captured as build note. (In full Octave, this ships to the script builder.)"
+            );
+            bumpWallet(3);
+          }
+        } else if (currentMode === "post") {
+          appendLine("ai", "Posted to local log. (Network hook comes next.)");
+          bumpWallet(2);
+        } else if (currentMode === "wallet") {
+          appendLine("ai", "Wallet balance: " + loadWallet() + " INF (local prototype).");
+        }
+      }
+
+      modeButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const mode = btn.getAttribute("data-mode");
+          currentMode = mode;
+          modeButtons.forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          statusMode.textContent =
+            mode.charAt(0).toUpperCase() + mode.slice(1).replace(/_/g, " ");
+          appendLine("system", "Mode switched to " + statusMode.textContent + ".");
+        });
+      });
+
+      colorToggles.forEach(toggle => {
+        toggle.addEventListener("click", () => {
+          const mode = toggle.getAttribute("data-color-mode");
+          colorMode = mode;
+          colorToggles.forEach(t => t.classList.remove("active"));
+          toggle.classList.add("active");
+          appendLine("system", "Color mode set to " + mode + ".");
+        });
+      });
+
+      inputEl.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter") {
+          ev.preventDefault();
+          handleSubmit();
+        }
+      });
+
+      postBtn.addEventListener("click", () => {
+        handleSubmit();
+        inputEl.focus();
+      });
+
+      // boot
+      loadWallet();
+      restoreLog();
+      inputEl.focus();
+    })();
+  </script>
 </body>
 </html>
