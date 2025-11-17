@@ -3,671 +3,460 @@
 <head>
   <meta charset="UTF-8" />
   <title>Infinity Octave OS — Terminal v1</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
-      --bg-main: #020617;
-      --bg-gradient-top: #050b18;
-      --bg-gradient-bottom: #01010a;
-
-      --glass-bg: rgba(8, 20, 40, 0.75);
-      --glass-border: rgba(70, 160, 255, 0.75);
-      --glass-shadow: 0 0 24px rgba(0, 170, 255, 0.35);
-
-      --text-main: #e5f2ff;
-      --text-soft: #9fb3d5;
-      --accent-cyan: #3ad5ff;
-      --accent-blue: #4da3ff;
-
-      --button-bg: rgba(10, 40, 80, 0.9);
-      --button-border: rgba(90, 190, 255, 0.9);
-      --button-active-bg: rgba(30, 80, 140, 0.95);
-      --button-active-glow: 0 0 18px rgba(64, 196, 255, 0.9);
-
-      --input-bg: #040826;
-      --input-border: rgba(88, 189, 255, 0.9);
-      --prompt-color: #22d3ee;
-
-      /* Infinity palette */
-      --inf-purple: #a855ff;
-      --inf-green: #22c55e;
-      --inf-blue: #38bdf8;
-      --inf-red: #f97373;
-      --inf-orange: #fb923c;
+      --bg: #020712;
+      --panel: #050b18;
+      --border: #1b3d6b;
+      --accent: #29d9ff;
+      --accent-soft: rgba(41, 217, 255, 0.3);
+      --text-main: #e9f4ff;
+      --text-soft: #a7c0e0;
+      --danger: #ff5577;
+      --success: #00ffa3;
+      --wallet: #21ff9c;
+      --token-glow: rgba(0, 255, 163, 0.16);
+      --token-pill: rgba(0, 255, 163, 0.08);
+      --input-bg: #02041a;
     }
 
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
     }
 
     body {
-      min-height: 100vh;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-        "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, var(--bg-gradient-top) 0%, var(--bg-gradient-bottom) 60%, #000 100%);
+      margin: 0;
+      background: radial-gradient(circle at top, #06142b 0, #020712 48%, #000 100%);
       color: var(--text-main);
+      min-height: 100vh;
       display: flex;
-      align-items: stretch;
       justify-content: center;
-      padding: 16px;
     }
 
-    .page {
+    .shell {
       width: 100%;
       max-width: 960px;
-      margin: auto;
+      padding: 20px 14px 32px;
     }
 
     header {
       display: flex;
-      align-items: baseline;
       justify-content: space-between;
-      margin-bottom: 16px;
-      gap: 12px;
+      align-items: center;
+      margin-bottom: 18px;
     }
 
-    header .brand {
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      font-size: 0.9rem;
+    .brand-line {
+      font-size: 13px;
+      letter-spacing: 0.25em;
       text-transform: uppercase;
-      color: var(--accent-cyan);
+      color: var(--accent);
     }
 
-    header .brand span {
-      opacity: 0.7;
-      font-weight: 500;
-    }
-
-    header a.portal-link {
-      font-size: 0.8rem;
-      text-decoration: none;
-      color: var(--text-soft);
-      opacity: 0.8;
-    }
-
-    header a.portal-link:hover {
-      color: var(--accent-cyan);
-      opacity: 1;
-    }
-
-    .title-block {
-      text-align: center;
-      margin-bottom: 10px;
-    }
-
-    .title-block h1 {
-      font-size: 2.1rem;
+    .header-title {
+      font-size: 24px;
       font-weight: 800;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: #c0dcff;
-      text-shadow: 0 0 32px rgba(59, 130, 246, 0.75);
-    }
-
-    .title-block h2 {
       margin-top: 4px;
-      font-size: 1rem;
-      font-weight: 500;
-      color: var(--text-soft);
+      text-shadow: 0 0 16px rgba(41, 217, 255, 0.65);
     }
 
-    .terminal-shell {
-      margin-top: 18px;
-      background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.25), transparent 50%),
-                  radial-gradient(circle at bottom right, rgba(8, 47, 73, 0.35), transparent 55%);
+    .portal-link {
+      font-size: 13px;
+      color: var(--text-soft);
+      opacity: 0.9;
+    }
+
+    .portal-link span {
+      opacity: 0.85;
+    }
+
+    .portal-link::before {
+      content: "⧉ ";
+      opacity: 0.7;
+    }
+
+    .terminal-card {
+      background: radial-gradient(circle at top left, #0b1630, #050b18 48%, #020811);
       border-radius: 22px;
-      padding: 2px;
-      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.95);
+      padding: 18px 14px 16px;
+      border: 1px solid rgba(45, 120, 210, 0.6);
+      box-shadow:
+        0 0 45px rgba(0, 0, 0, 0.7),
+        0 0 26px rgba(41, 217, 255, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .terminal-card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 0 0, rgba(0, 255, 163, 0.06), transparent 58%),
+        radial-gradient(circle at 100% 100%, rgba(41, 217, 255, 0.08), transparent 55%);
+      opacity: 0.9;
+      pointer-events: none;
     }
 
     .terminal-inner {
-      background: var(--glass-bg);
-      border-radius: 20px;
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--glass-shadow);
-      backdrop-filter: blur(22px);
-      padding: 14px 14px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      position: relative;
+      z-index: 1;
     }
 
-    .mode-row {
+    .button-row {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
+      margin-bottom: 14px;
       justify-content: center;
-      margin-bottom: 6px;
     }
 
-    .mode-button {
+    .pill-btn {
+      min-width: 120px;
+      padding: 9px 16px;
       border-radius: 999px;
-      border: 1px solid var(--button-border);
-      background: var(--button-bg);
+      border: 1px solid rgba(104, 168, 255, 0.7);
+      background: radial-gradient(circle at top, #07132b, #020712 70%);
       color: var(--text-main);
-      padding: 8px 14px;
-      font-size: 0.85rem;
-      letter-spacing: 0.04em;
+      font-size: 14px;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
+      font-weight: 600;
       cursor: pointer;
-      transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease,
-        border-color 0.15s ease, color 0.15s ease;
-      white-space: nowrap;
+      outline: none;
+      position: relative;
     }
 
-    .mode-button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 0 14px rgba(59, 130, 246, 0.85);
+    .pill-btn span.label {
+      position: relative;
+      z-index: 1;
     }
 
-    .mode-button.active {
-      background: var(--button-active-bg);
-      box-shadow: var(--button-active-glow);
-      border-color: #7dd3fc;
-      color: #e0f2fe;
+    .pill-btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(circle at top, rgba(41, 217, 255, 0.18), transparent 68%);
+      opacity: 0;
+      transition: opacity 0.15s ease-out;
+    }
+
+    .pill-btn:hover::before {
+      opacity: 1;
+    }
+
+    .pill-btn.active {
+      border-color: var(--accent);
+      box-shadow:
+        0 0 16px rgba(41, 217, 255, 0.7),
+        0 0 3px rgba(41, 217, 255, 0.9) inset;
+    }
+
+    .pill-btn.wallet {
+      border-color: var(--wallet);
+      color: var(--wallet);
+    }
+
+    .pill-btn.wallet span.label::before {
+      content: "∞ ";
+    }
+
+    .pill-btn.wallet-glow {
+      box-shadow:
+        0 0 18px rgba(0, 255, 163, 0.8),
+        0 0 3px rgba(0, 255, 163, 0.9) inset;
+      background: radial-gradient(circle at top, rgba(0, 255, 163, 0.22), #020712 70%);
     }
 
     .status-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.78rem;
+      font-size: 13px;
       color: var(--text-soft);
+      margin-bottom: 8px;
       padding: 0 2px;
     }
 
-    .status-row span strong {
-      color: var(--accent-cyan);
+    .status-row strong {
+      color: var(--accent);
     }
 
-    .status-wallet {
+    .token-readout {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
+      gap: 4px;
+      font-size: 13px;
     }
 
-    .status-wallet-label {
-      opacity: 0.75;
-    }
-
-    .status-wallet-value {
+    .token-pill {
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(0, 255, 163, 0.7);
+      background: var(--token-pill);
+      color: var(--wallet);
       font-weight: 600;
-      color: #bef264;
+      display: inline-flex;
+      align-items: baseline;
+      gap: 4px;
     }
 
-    .status-wallet-currency {
-      font-size: 0.7rem;
-      color: #a5f3fc;
+    .token-pill small {
+      font-size: 11px;
+      color: var(--text-soft);
+      opacity: 0.85;
     }
 
-    .console-window {
+    .console {
       margin-top: 6px;
       border-radius: 16px;
-      border: 1px solid rgba(75, 126, 210, 0.9);
-      background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.95), rgba(3, 7, 18, 0.96));
-      box-shadow: 0 0 40px rgba(15, 23, 42, 0.9);
-      padding: 12px 12px 10px;
-      min-height: 200px;
+      border: 1px solid rgba(28, 77, 144, 0.9);
+      background: radial-gradient(circle at top left, #04081a, #02030d 55%, #000 100%);
+      min-height: 220px;
       max-height: 360px;
       overflow-y: auto;
-      font-size: 0.85rem;
-      line-height: 1.5;
+      padding: 10px 11px;
+      font-size: 13px;
+      line-height: 1.45;
+      box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.85);
+    }
+
+    .console::-webkit-scrollbar {
+      width: 6px;
+    }
+    .console::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .console::-webkit-scrollbar-thumb {
+      background: rgba(60, 105, 170, 0.85);
+      border-radius: 999px;
     }
 
     .console-line {
-      margin-bottom: 4px;
+      white-space: pre-wrap;
       word-wrap: break-word;
+      margin-bottom: 3px;
     }
 
     .console-line.system {
       color: var(--text-soft);
-      opacity: 0.9;
     }
 
-    .console-line.user {
-      color: var(--accent-cyan);
+    .console-line.you {
+      color: #7ef9ff;
     }
 
     .console-line.ai {
-      color: #e0f2fe;
+      color: #ffda7c;
     }
 
-    .console-line .label {
-      opacity: 0.7;
-      margin-right: 4px;
+    .console-line.ai span.ai-tag {
+      color: #ff9cdc;
     }
 
-    .color-word.inf-0 { color: var(--inf-purple); }
-    .color-word.inf-1 { color: var(--inf-green); }
-    .color-word.inf-2 { color: var(--inf-blue); }
-    .color-word.inf-3 { color: var(--inf-red); }
-    .color-word.inf-4 { color: var(--inf-orange); }
+    .console-line token {
+      color: var(--wallet);
+      font-weight: 600;
+    }
 
     .input-row {
-      margin-top: 10px;
       display: flex;
       align-items: center;
       gap: 8px;
-      flex-wrap: nowrap;
+      margin-top: 12px;
     }
 
     .prompt {
-      color: var(--prompt-color);
-      font-weight: 600;
-      font-size: 1.1rem;
+      color: var(--accent);
+      font-size: 22px;
+      padding-bottom: 4px;
     }
 
-    #terminal-input {
+    .input-box {
       flex: 1;
-      background: radial-gradient(circle at top, #020617, #02011a);
+      background: radial-gradient(circle at top, #020722, var(--input-bg));
       border-radius: 999px;
-      border: 1px solid var(--input-border);
-      color: #e0f2fe;
-      padding: 8px 14px;
-      font-size: 0.95rem;
+      padding: 7px 14px;
+      border: 1px solid rgba(46, 117, 210, 0.85);
+      box-shadow:
+        0 0 12px rgba(41, 217, 255, 0.35),
+        inset 0 0 14px rgba(0, 0, 0, 0.9);
+      display: flex;
+      align-items: center;
+    }
+
+    .input-box input {
+      background: transparent;
+      border: none;
       outline: none;
-      box-shadow: 0 0 18px rgba(56, 189, 248, 0.35);
+      flex: 1;
+      color: var(--text-main);
+      font-size: 15px;
     }
 
-    #terminal-input::placeholder {
-      color: rgba(148, 163, 184, 0.9);
+    .input-box input::placeholder {
+      color: rgba(166, 189, 217, 0.7);
     }
 
-    #terminal-input:focus {
-      border-color: #7dd3fc;
-      box-shadow: 0 0 22px rgba(56, 189, 248, 0.7);
-    }
-
-    .post-button {
+    .post-btn {
+      padding: 9px 22px;
+      background: radial-gradient(circle at top, #00ffa3, #009a6b);
       border-radius: 999px;
-      border: 1px solid var(--button-border);
-      background: linear-gradient(135deg, #22c55e, #22d3ee);
-      color: #022c22;
+      border: none;
+      color: #00120b;
       font-weight: 700;
-      padding: 8px 16px;
-      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
       cursor: pointer;
-      box-shadow: 0 0 18px rgba(34, 197, 94, 0.75);
-      white-space: nowrap;
+      box-shadow:
+        0 0 20px rgba(0, 255, 163, 0.8),
+        0 0 4px rgba(0, 0, 0, 0.8);
     }
 
-    .post-button:active {
+    .post-btn:active {
       transform: translateY(1px);
-      box-shadow: 0 0 10px rgba(34, 197, 94, 0.55);
+      box-shadow:
+        0 0 12px rgba(0, 255, 163, 0.7),
+        0 0 3px rgba(0, 0, 0, 0.8);
     }
 
-    .options-row {
-      margin-top: 8px;
+    .mode-toggle-row {
+      margin-top: 10px;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.75rem;
-      color: var(--text-soft);
+      justify-content: flex-end;
       gap: 10px;
-      flex-wrap: wrap;
+      font-size: 13px;
     }
 
-    .options-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .pill-toggle {
+    .mode-pill {
+      padding: 5px 13px;
       border-radius: 999px;
-      border: 1px solid rgba(94, 234, 212, 0.7);
-      padding: 4px 10px;
+      border: 1px solid rgba(110, 160, 230, 0.85);
+      background: rgba(3, 10, 25, 0.9);
       cursor: pointer;
-      font-size: 0.75rem;
-      background: rgba(8, 47, 73, 0.9);
-      color: #a5f3fc;
-    }
-
-    .pill-toggle.active {
-      background: rgba(6, 95, 70, 0.9);
-      color: #bbf7d0;
-      box-shadow: 0 0 14px rgba(45, 212, 191, 0.75);
-    }
-
-    .info-panel {
-      margin-top: 16px;
-      padding: 14px 16px;
-      border-radius: 18px;
-      border: 1px solid rgba(55, 65, 81, 0.9);
-      background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.95), rgba(3, 7, 18, 0.98));
       color: var(--text-soft);
-      font-size: 0.8rem;
-      line-height: 1.6;
     }
 
-    .info-panel h3 {
-      font-size: 0.9rem;
-      margin-bottom: 6px;
-      color: #c4d9ff;
+    .mode-pill.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 10px rgba(41, 217, 255, 0.7);
     }
 
-    .info-panel ul {
-      padding-left: 18px;
-      margin-top: 6px;
+    .footer-note {
+      margin-top: 14px;
+      font-size: 11px;
+      color: rgba(149, 175, 211, 0.82);
+      line-height: 1.5;
     }
 
-    .info-panel li {
-      margin-bottom: 4px;
-    }
-
-    .color-legend span {
-      display: inline-block;
-      margin-right: 10px;
-      font-size: 0.78rem;
-    }
-
-    .color-dot {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      margin-right: 4px;
+    .footer-note b {
+      color: #ffd66b;
     }
 
     @media (max-width: 600px) {
-      .title-block h1 {
-        font-size: 1.6rem;
+      .header-title {
+        font-size: 18px;
       }
-      .console-window {
-        min-height: 180px;
-        max-height: 320px;
+
+      .terminal-card {
+        padding: 16px 11px 14px;
       }
-      .input-row {
-        flex-wrap: nowrap;
+
+      .button-row {
+        gap: 7px;
       }
-      .post-button {
-        padding-inline: 12px;
+
+      .pill-btn {
+        min-width: 46%;
+        font-size: 12px;
+        padding: 7px 10px;
+      }
+
+      .console {
+        min-height: 190px;
+        max-height: 300px;
+      }
+
+      .post-btn {
+        padding: 8px 16px;
+        font-size: 13px;
       }
     }
   </style>
 </head>
-
 <body>
-  <div class="page">
+  <div class="shell">
     <header>
-      <div class="brand">INFINITY <span>Octave OS</span></div>
-      <a class="portal-link" href="https://pewpi-infinity.github.io/" target="_blank" rel="noopener">
-        ⌂ Infinity Portal
-      </a>
+      <div>
+        <div class="brand-line">INFINITY OCTAVE OS</div>
+        <div class="header-title">Infinity Octave OS — Terminal v1</div>
+      </div>
+      <div class="portal-link"><span>∞ Infinity Portal</span></div>
     </header>
 
-    <div class="title-block">
-      <h1>Infinity Octave OS — Terminal v1</h1>
-      <h2>Soft-glass Neon Console for Conversations, Secrets & Builders</h2>
-    </div>
+    <main>
+      <section class="terminal-card">
+        <div class="terminal-inner">
+          <div class="button-row">
+            <button class="pill-btn active" data-mode-btn="conversate"><span class="label">Conversate</span></button>
+            <button class="pill-btn" data-mode-btn="secret"><span class="label">Secret Encode</span></button>
+            <button class="pill-btn" data-mode-btn="retrieve"><span class="label">Retrieve</span></button>
+            <button class="pill-btn" data-mode-btn="builder"><span class="label">Builder</span></button>
+            <button class="pill-btn" data-mode-btn="post"><span class="label">Post</span></button>
+            <button class="pill-btn wallet" id="walletBtn">
+              <span class="label">Wallet</span>
+            </button>
+          </div>
 
-    <section class="terminal-shell">
-      <div class="terminal-inner">
-        <div class="mode-row">
-          <button class="mode-button active" data-mode="conversate">Conversate</button>
-          <button class="mode-button" data-mode="secret">Secret Encode</button>
-          <button class="mode-button" data-mode="retrieve">Retrieve</button>
-          <button class="mode-button" data-mode="builder">Builder</button>
-          <button class="mode-button" data-mode="post">Post</button>
-          <button class="mode-button" data-mode="wallet">Wallet</button>
-        </div>
+          <div class="status-row">
+            <div>Mode: <strong id="modeLabel">Conversate</strong></div>
+            <div class="token-readout">
+              Tokens:
+              <span class="token-pill">
+                <span id="tokenCount">10</span>
+                <small>INF / day ≤ 48</small>
+              </span>
+            </div>
+          </div>
 
-        <div class="status-row">
-          <span>Mode: <strong id="status-mode">Conversate</strong></span>
-          <div class="status-wallet">
-            <span class="status-wallet-label">∞ Tokens:</span>
-            <span class="status-wallet-value" id="wallet-balance">0</span>
-            <span class="status-wallet-currency">INF</span>
+          <div class="console" id="console"></div>
+
+          <div class="input-row">
+            <div class="prompt">&gt;</div>
+            <div class="input-box">
+              <input
+                id="input"
+                type="text"
+                autocomplete="off"
+                placeholder="Hello Rogers..."
+              />
+            </div>
+            <button class="post-btn" id="postBtn">Post</button>
+          </div>
+
+          <div class="mode-toggle-row">
+            <div class="mode-pill active" data-color-mode="infinity">Infinity</div>
+            <div class="mode-pill" data-color-mode="plain">Plain</div>
+          </div>
+
+          <div class="footer-note">
+            Logs and conversations are written into the Octave script-space itself,
+            not just “local storage.” <b>Each token represents time, attention, and
+            build-energy inside Infinity.</b> Baseline: 1 token every 30 minutes,
+            max 48/day. Bigger jumps will attach later to real project work.
           </div>
         </div>
-
-        <div class="console-window" id="console">
-          <div class="console-line system">
-            <span class="label">[system]</span>
-            Infinity Octave OS online. Type and press <strong>Enter</strong> or tap <strong>Post</strong>.
-          </div>
-          <div class="console-line system">
-            <span class="label">[hint]</span>
-            Type <strong>build</strong> in Builder mode to enter quick-build context.
-          </div>
-        </div>
-
-        <div class="input-row">
-          <span class="prompt">&gt;</span>
-          <input
-            id="terminal-input"
-            type="text"
-            autocomplete="off"
-            placeholder="Hello Rogers..."
-          />
-          <button class="post-button" id="post-button">Post</button>
-        </div>
-
-        <div class="options-row">
-          <div class="options-group">
-            <span>Color mode:</span>
-            <button class="pill-toggle active" data-color-mode="infinity">Infinity</button>
-            <button class="pill-toggle" data-color-mode="plain">Plain</button>
-          </div>
-          <div class="options-group">
-            <span>Every message earns tokens; big builds earn more.</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="info-panel">
-      <h3>How this terminal works</h3>
-      <ul>
-        <li><strong>Conversate</strong> — simple echo chat; good for quick logging.</li>
-        <li><strong>Secret Encode</strong> — prototype PewPi-style encoding (local only).</li>
-        <li><strong>Retrieve</strong> — pulls back anything saved on this device.</li>
-        <li><strong>Builder</strong> — type <code>build</code> plus instructions for script or app ideas.</li>
-        <li><strong>Post</strong> — second send button, same as hitting Enter on mobile.</li>
-        <li><strong>Wallet</strong> — shows total tokens in this browser (saved in localStorage).</li>
-      </ul>
-
-      <div class="color-legend" style="margin-top:10px;">
-        <span><span class="color-dot" style="background:var(--inf-purple);"></span>Purple builds connection.</span>
-        <span><span class="color-dot" style="background:var(--inf-green);"></span>Green stabilizes.</span>
-        <span><span class="color-dot" style="background:var(--inf-blue);"></span>Blue rewards.</span>
-        <span><span class="color-dot" style="background:var(--inf-red);"></span>Red reveals.</span>
-        <span><span class="color-dot" style="background:var(--inf-orange);"></span>Orange governs.</span>
-      </div>
-    </section>
+      </section>
+    </main>
   </div>
 
-  <script>
-    (function () {
-      const consoleEl = document.getElementById("console");
-      const inputEl = document.getElementById("terminal-input");
-      const postBtn = document.getElementById("post-button");
-      const modeButtons = Array.from(document.querySelectorAll(".mode-button"));
-      const statusMode = document.getElementById("status-mode");
-      const walletBalanceEl = document.getElementById("wallet-balance");
-      const colorToggles = Array.from(document.querySelectorAll(".pill-toggle"));
-
-      let currentMode = "conversate";
-      let colorMode = "infinity";
-
-      const WALLET_KEY = "octave_wallet_balance";
-      const LOG_KEY = "octave_terminal_log";
-
-      function loadWallet() {
-        const stored = localStorage.getItem(WALLET_KEY);
-        const value = stored ? parseInt(stored, 10) || 0 : 0;
-        walletBalanceEl.textContent = value;
-        return value;
-      }
-
-      function saveWallet(value) {
-        localStorage.setItem(WALLET_KEY, String(value));
-        walletBalanceEl.textContent = value;
-      }
-
-      function bumpWallet(amount) {
-        const current = loadWallet();
-        saveWallet(current + amount);
-      }
-
-      function appendLine(role, text) {
-        const line = document.createElement("div");
-        line.classList.add("console-line", role);
-
-        const label = document.createElement("span");
-        label.classList.add("label");
-        label.textContent = role === "user" ? "[you]" :
-                            role === "ai" ? "[ai]" :
-                            "[system]";
-        line.appendChild(label);
-
-        if (colorMode === "infinity" && role !== "system") {
-          const words = text.split(/\s+/);
-          words.forEach((word, idx) => {
-            const span = document.createElement("span");
-            span.textContent = word + (idx === words.length - 1 ? "" : " ");
-            span.classList.add("color-word", "inf-" + (idx % 5));
-            line.appendChild(span);
-          });
-        } else {
-          const span = document.createElement("span");
-          span.textContent = text;
-          line.appendChild(span);
-        }
-
-        consoleEl.appendChild(line);
-        consoleEl.scrollTop = consoleEl.scrollHeight;
-        persistLog();
-      }
-
-      function encodeSecret(text) {
-        // Placeholder: simple base64 to stand in for PewPi logic.
-        try {
-          return btoa(unescape(encodeURIComponent(text)));
-        } catch {
-          return text.split("").reverse().join("");
-        }
-      }
-
-      function decodeSecret(text) {
-        try {
-          return decodeURIComponent(escape(atob(text)));
-        } catch {
-          return "(unable to decode demo secret)";
-        }
-      }
-
-      function persistLog() {
-        const lines = Array.from(consoleEl.querySelectorAll(".console-line")).map(line => ({
-          role: line.classList.contains("user")
-            ? "user"
-            : line.classList.contains("ai")
-            ? "ai"
-            : "system",
-          text: line.textContent || ""
-        }));
-        localStorage.setItem(LOG_KEY, JSON.stringify(lines));
-      }
-
-      function restoreLog() {
-        const raw = localStorage.getItem(LOG_KEY);
-        if (!raw) return;
-        try {
-          const lines = JSON.parse(raw);
-          consoleEl.innerHTML = "";
-          lines.forEach(l => {
-            const roleClass = l.role === "user" ? "user" : l.role === "ai" ? "ai" : "system";
-            appendLine(roleClass, l.text.replace(/^\[[^\]]+\]\s*/, ""));
-          });
-        } catch {
-          // ignore
-        }
-      }
-
-      function handleSubmit() {
-        const text = inputEl.value.trim();
-        if (!text) return;
-        inputEl.value = "";
-
-        appendLine("user", text);
-        bumpWallet(1);
-
-        if (currentMode === "conversate") {
-          appendLine("ai", "Echo: " + text);
-        } else if (currentMode === "secret") {
-          const encoded = encodeSecret(text);
-          appendLine("ai", "Secret stored: " + encoded);
-          bumpWallet(4);
-        } else if (currentMode === "retrieve") {
-          const stored = localStorage.getItem(LOG_KEY);
-          appendLine("ai", stored ? "Local log retrieved; scroll up to review." : "No stored log yet.");
-        } else if (currentMode === "builder") {
-          if (/^build\b/i.test(text)) {
-            appendLine(
-              "ai",
-              "Builder context armed. Use this thread to describe the app or script; Octave will later send it to the generator."
-            );
-            bumpWallet(10);
-          } else {
-            appendLine(
-              "ai",
-              "Captured as build note. (In full Octave, this ships to the script builder.)"
-            );
-            bumpWallet(3);
-          }
-        } else if (currentMode === "post") {
-          appendLine("ai", "Posted to local log. (Network hook comes next.)");
-          bumpWallet(2);
-        } else if (currentMode === "wallet") {
-          appendLine("ai", "Wallet balance: " + loadWallet() + " INF (local prototype).");
-        }
-      }
-
-      modeButtons.forEach(btn => {
-        btn.addEventListener("click", () => {
-          const mode = btn.getAttribute("data-mode");
-          currentMode = mode;
-          modeButtons.forEach(b => b.classList.remove("active"));
-          btn.classList.add("active");
-          statusMode.textContent =
-            mode.charAt(0).toUpperCase() + mode.slice(1).replace(/_/g, " ");
-          appendLine("system", "Mode switched to " + statusMode.textContent + ".");
-        });
-      });
-
-      colorToggles.forEach(toggle => {
-        toggle.addEventListener("click", () => {
-          const mode = toggle.getAttribute("data-color-mode");
-          colorMode = mode;
-          colorToggles.forEach(t => t.classList.remove("active"));
-          toggle.classList.add("active");
-          appendLine("system", "Color mode set to " + mode + ".");
-        });
-      });
-
-      inputEl.addEventListener("keydown", (ev) => {
-        if (ev.key === "Enter") {
-          ev.preventDefault();
-          handleSubmit();
-        }
-      });
-
-      postBtn.addEventListener("click", () => {
-        handleSubmit();
-        inputEl.focus();
-      });
-
-      // boot
-      loadWallet();
-      restoreLog();
-      inputEl.focus();
-    })();
-  </script>
+  <script src="js/octave-core.js"></script>
 </body>
 </html>
