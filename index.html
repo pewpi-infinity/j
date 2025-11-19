@@ -1,418 +1,197 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Infinity Octave OS — Terminal v1</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root {
-      --bg: #020712;
-      --panel: #050b18;
-      --border: #1b3d6b;
-      --accent: #29d9ff;
-      --accent-soft: rgba(41, 217, 255, 0.3);
-      --text-main: #e9f4ff;
-      --text-soft: #a7c0e0;
-      --danger: #ff5577;
-      --success: #00ffa3;
-      --wallet: #21ff9c;
-      --token-pill: rgba(0, 255, 163, 0.08);
-      --token-glow: rgba(0, 255, 163, 0.16);
-      --input-bg: #02041a;
-    }
-
-    * { box-sizing: border-box; font-family: system-ui, sans-serif; }
-
-    body {
-      margin: 0;
-      background: radial-gradient(circle at top, #06142b 0, #020712 48%, #000 100%);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-    }
-
-    .shell { width: 100%; max-width: 960px; padding: 20px 14px 32px; }
-
-    header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 18px;
-    }
-
-    .brand-line { font-size: 13px; letter-spacing: 0.25em; color: var(--accent); text-transform: uppercase; }
-    .header-title { font-size: 24px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 4px; text-shadow: 0 0 16px rgba(41,217,255,0.65); }
-
-    .portal-link { font-size: 13px; color: var(--text-soft); opacity: 0.9; }
-    .portal-link::before { content: "⧉ "; opacity: 0.7; }
-
-    .terminal-card {
-      background: radial-gradient(circle at top left, #0b1630, #050b18 48%, #020811);
-      border-radius: 22px; padding: 18px 14px 16px;
-      border: 1px solid rgba(45,120,210,0.6);
-      box-shadow: 0 0 45px rgba(0,0,0,0.7), 0 0 26px rgba(41,217,255,0.4);
-      position: relative; overflow: hidden;
-    }
-
-    .terminal-inner { position: relative; z-index: 1; }
-
-    .button-row {
-      display: flex; flex-wrap: wrap; gap: 10px;
-      margin-bottom: 14px; justify-content: center;
-    }
-
-    .pill-btn {
-      min-width: 120px; padding: 9px 16px; border-radius: 999px;
-      border: 1px solid rgba(104,168,255,0.7);
-      background: radial-gradient(circle at top, #07132b, #020712 70%);
-      color: var(--text-main); font-size: 14px;
-      letter-spacing: 0.06em; text-transform: uppercase;
-      font-weight: 600; cursor: pointer; position: relative;
-    }
-    .pill-btn.active { border-color: var(--accent); box-shadow: 0 0 16px rgba(41,217,255,0.7), inset 0 0 3px rgba(41,217,255,0.9); }
-
-    .pill-btn.wallet { border-color: var(--wallet); color: var(--wallet); }
-    .pill-btn.wallet .label::before { content: "∞ "; }
-
-    .status-row {
-      display: flex; justify-content: space-between; align-items: center;
-      font-size: 13px; color: var(--text-soft);
-      margin-bottom: 8px; padding: 0 2px;
-    }
-    .status-row strong { color: var(--accent); }
-
-    .token-readout { display: flex; align-items: center; gap: 4px; }
-    .token-pill {
-      padding: 3px 9px; border-radius: 999px;
-      border: 1px solid rgba(0,255,163,0.7);
-      background: var(--token-pill); color: var(--wallet);
-      font-weight: 600; display: flex; align-items: baseline; gap: 4px;
-    }
-    .token-pill small { font-size: 11px; color: var(--text-soft); opacity: 0.85; }
-
-    .console {
-      margin-top: 6px; border-radius: 16px;
-      border: 1px solid rgba(28,77,144,0.9);
-      background: radial-gradient(circle at top left, #04081a, #02030d 55%, #000);
-      min-height: 220px; max-height: 360px;
-      padding: 10px 11px; line-height: 1.45;
-      overflow-y: auto; font-size: 13px;
-      box-shadow: inset 0 0 24px rgba(0,0,0,0.85);
-    }
-    .console-line { margin-bottom: 3px; white-space: pre-wrap; }
-    .console-line.you { color: #7ef9ff; }
-    .console-line.ai { color: #ffda7c; }
-    .console-line.ai .ai-tag { color: #ff9cdc; }
-    .console-line.system { color: var(--text-soft); }
-
-    .input-row { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
-    .prompt { color: var(--accent); font-size: 22px; padding-bottom: 4px; }
-
-    .input-box {
-      flex: 1; border-radius: 999px; padding: 7px 14px;
-      background: radial-gradient(circle at top, #020722, var(--input-bg));
-      border: 1px solid rgba(46,117,210,0.85);
-      box-shadow: 0 0 12px rgba(41,217,255,0.35), inset 0 0 14px rgba(0,0,0,0.9);
-      display: flex; align-items: center;
-    }
-    .input-box input { flex: 1; background: transparent; color: var(--text-main); border: none; outline: none; }
-
-    .post-btn {
-      padding: 9px 22px; border-radius: 999px;
-      background: radial-gradient(circle at top, #00ffa3, #009a6b);
-      border: none; color: #00120b; font-weight: 700;
-      text-transform: uppercase; cursor: pointer;
-      box-shadow: 0 0 20px rgba(0,255,163,0.8), 0 0 4px rgba(0,0,0,0.8);
-    }
-
-    .mode-toggle-row {
-      margin-top: 10px; display: flex; justify-content: flex-end; gap: 10px;
-      font-size: 13px;
-    }
-    .mode-pill {
-      padding: 5px 13px; border-radius: 999px;
-      border: 1px solid rgba(110,160,230,0.85);
-      background: rgba(3,10,25,0.9); cursor: pointer;
-      color: var(--text-soft);
-    }
-    .mode-pill.active { border-color: var(--accent); color: var(--accent); }
-
-    .footer-note {
-      margin-top: 14px; font-size: 11px;
-      color: rgba(149,175,211,0.82); line-height: 1.5;
-    }
-    .footer-note b { color: #ffd66b; }
-
-    /* SECRET PAT PANEL */
-    #pat-admin {
-      display:none;
-      position:fixed; bottom:20px; right:20px;
-      background:#000000cc;
-      padding:15px;
-      border-radius:12px;
-      border:1px solid #00aaff;
-      z-index:9999; width:260px; font-size:14px;
-    }
-    #pat-admin input {
-      width:100%; padding:6px; border-radius:6px;
-      background:#0a0f22; color:#fff;
-      border:1px solid #1e6aff;
-    }
-    #pat-admin button {
-      margin-top:8px; width:100%; padding:8px;
-      background:#0af; color:#fff; border:0; border-radius:6px;
-      font-weight:bold;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinity Octave OS — Terminal v1</title>
+    <style>
+        body {
+            background: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
+        }
+        #terminal {
+            height: 100vh;
+            overflow-y: auto;
+            padding-bottom: 10px;
+        }
+        .header { font-size: 1.2em; font-weight: bold; }
+        .subheader { font-size: 1em; }
+        .status { color: #aaa; font-size: 0.9em; }
+        .prompt { color: #0f0; margin-right: 5px; }
+        .input-line {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        #input {
+            background: none;
+            border: none;
+            color: #0f0;
+            font-family: inherit;
+            font-size: 1em;
+            outline: none;
+            flex: 1;
+        }
+        #input::placeholder { color: #555; }
+        .output-line { margin: 5px 0; white-space: pre-wrap; }
+        .error { color: #f00; }
+        .pat-button { cursor: pointer; color: #ff0; text-decoration: underline; }
+        .pat-button:hover { color: #fff; }
+        hr { border: none; border-top: 1px solid #333; margin: 20px 0; }
+    </style>
 </head>
-
 <body>
-  <div class="shell">
-    <header>
-      <div>
-        <div class="brand-line">INFINITY OCTAVE OS</div>
-        <div class="header-title">Infinity Octave OS — Terminal v1</div>
-      </div>
-      <div class="portal-link"><span>∞ Infinity Portal</span></div>
-    </header>
-
-    <main>
-      <section class="terminal-card">
-        <div class="terminal-inner">
-
-          <div class="button-row">
-            <button class="pill-btn active" data-mode-btn="conversate"><span class="label">Conversate</span></button>
-            <button class="pill-btn" data-mode-btn="secret"><span class="label">Secret Encode</span></button>
-            <button class="pill-btn" data-mode-btn="retrieve"><span class="label">Retrieve</span></button>
-            <button class="pill-btn" data-mode-btn="builder"><span class="label">Builder</span></button>
-            <button class="pill-btn" data-mode-btn="post"><span class="label">Post</span></button>
-            <button class="pill-btn wallet" id="walletBtn"><span class="label">Wallet</span></button>
-          </div>
-
-          <div class="status-row">
-            <div>Mode: <strong id="modeLabel">Conversate</strong></div>
-            <div class="token-readout">
-              Tokens:
-              <span class="token-pill">
-                <span id="tokenCount">10</span>
-                <small>INF / day ≤ 48</small>
-              </span>
-            </div>
-          </div>
-
-          <div class="console" id="console"></div>
-
-          <div class="input-row">
-            <div class="prompt">&gt;</div>
-            <div class="input-box">
-              <input id="input" type="text" autocomplete="off" placeholder="Hello Rogers..." />
-            </div>
-            <button class="post-btn" id="postBtn">Post</button>
-          </div>
-
-          <div class="mode-toggle-row">
-            <div class="mode-pill active" data-color-mode="infinity">Infinity</div>
-            <div class="mode-pill" data-color-mode="plain">Plain</div>
-          </div>
-
-          <div class="footer-note">
-            Logs and conversations are written into the Octave script-space itself, not just “local storage.”
-            <b>Tokens represent time, attention, and energy inside Infinity.</b>
-          </div>
+    <div id="terminal">
+        <div id="output" class="output-line"></div>
+        <div class="input-line">
+            <span class="prompt">&gt;</span>
+            <input id="input" type="text" autofocus placeholder="Type a command...">
         </div>
-      </section>
-    </main>
-  </div>
+    </div>
 
-  <!-- SECRET ADMIN PANEL -->
-  <div id="pat-admin">
-    <div style="margin-bottom:8px; color:#0af;"><strong>Admin: Set PAT</strong></div>
-    <input id="pat-input" type="password" placeholder="Paste PAT…" />
-    <button onclick="savePAT()">Save PAT</button>
-    <div id="pat-status" style="color:#0f0; margin-top:6px;"></div>
-  </div>
-<!-- SECRET ADMIN PANEL (already exists above this) -->
-<!-- VIEW COUNTER + VISITOR MAP -->
-<div id="viewBox" style="
-  position: fixed; 
-  top: 20px; 
-  right: 20px; 
-  background: #020714dd;
-  padding: 12px 16px;
-  border-radius: 12px;
-  border: 1px solid #2aaaff;
-  box-shadow: 0 0 18px #0099ffaa, inset 0 0 8px #000;
-  font-size: 13px;
-  color: #b9d8ff;
-  backdrop-filter: blur(4px);
-  z-index: 9999;">
-  <div><strong>Visitors:</strong> <span id="viewCount">0</span></div>
-  <div id="visitorLoc" style="margin-top:4px; font-size:12px; color:#7ac7ff;"></div>
-  <canvas id="visitorMap" width="140" height="70" style="margin-top:8px; width:140px; height:70px;"></canvas>
-</div>
+    <script>
+        const output = document.getElementById('output');
+        const input = document.getElementById('input');
+        const terminal = document.getElementById('terminal');
+        const owner = 'pewpi-infinity';
+        const repo = 'j';
 
-<script>
-(async function(){
+        // Persisted state
+        let tokens = parseInt(localStorage.getItem('tokens')) || 48;
+        let visitors = parseInt(localStorage.getItem('visitors') || '0') + 1;
+        let mode = localStorage.getItem('mode') || 'Conversate';
+        localStorage.setItem('visitors', visitors);
 
-  /* ---------------------------
-      LOAD & INCREMENT VIEWS
-  ----------------------------*/
-  const KEY = "infinity_page_views";
-  let count = Number(localStorage.getItem(KEY) || 0);
-  count++;
-  localStorage.setItem(KEY, count);
-  document.getElementById("viewCount").textContent = count;
+        // Helper: Add line to output and scroll
+        function addLine(text, className = '') {
+            const div = document.createElement('div');
+            div.className = `output-line ${className}`;
+            div.textContent = text;
+            output.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
 
-  /* ---------------------------
-      GEOLOCATION LOOKUP
-  ----------------------------*/
-  async function getGeo(){
-    try {
-      const r = await fetch("https://ipapi.co/json/");
-      return await r.json();
-    } catch(e){
-      return null;
-    }
-  }
+        // Display initial UI
+        addLine('INFINITY OCTAVE OS', 'header');
+        addLine('Infinity Octave OS — Terminal v1', 'subheader');
+        addLine(`Mode: ${mode}`, 'status');
+        addLine(`Tokens: ${tokens} INF / day ≤ 48`, 'status');
+        addLine('');
+        addLine('Infinity');
+        addLine('Plain');
+        addLine(`Visitors: ${visitors}`);
+        addLine('');
+        const patButton = document.createElement('span');
+        patButton.innerHTML = 'Admin: Set PAT';
+        patButton.className = 'pat-button';
+        patButton.onclick = () => {
+            const pat = prompt('Enter GitHub Personal Access Token:');
+            if (pat) {
+                localStorage.setItem('pat', pat);
+                addLine('PAT set successfully.');
+            } else {
+                addLine('PAT not set.', 'error');
+            }
+        };
+        output.appendChild(patButton);
+        addLine('');
+        const divider = document.createElement('hr');
+        output.appendChild(divider);
 
-  const geo = await getGeo();
-  if(geo){
-    document.getElementById("visitorLoc").textContent =
-      `${geo.city || ""} ${geo.region || ""} ${geo.country_name || ""}`;
-    drawDot(geo.latitude, geo.longitude);
-  }
+        // GitHub API: Add file
+        async function createFile(path, content, message) {
+            const pat = localStorage.getItem('pat');
+            if (!pat) {
+                addLine('Error: Set PAT first via Admin button.', 'error');
+                return;
+            }
+            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+            const body = {
+                message: message || 'Added via Infinity Terminal',
+                content: btoa(unescape(encodeURIComponent(content))) // Base64 encode
+            };
+            try {
+                const res = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${pat}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+                if (res.ok) {
+                    addLine(`✅ File added/updated: ${path}`);
+                } else {
+                    const err = await res.json();
+                    addLine(`❌ GitHub API error: ${err.message}`, 'error');
+                }
+            } catch (err) {
+                addLine(`❌ Network error: ${err.message}`, 'error');
+            }
+        }
 
-  /* ---------------------------
-      WORLD MAP DOT (TINY)
-  ----------------------------*/
-  function drawDot(lat, lon){
-    const c = document.getElementById("visitorMap");
-    const ctx = c.getContext("2d");
+        // Process input
+        function processInput(cmd) {
+            if (!cmd.trim()) return;
+            addLine(`> ${cmd}`);
+            tokens = Math.max(0, tokens - 1);
+            localStorage.setItem('tokens', tokens);
+            addLine(`Tokens remaining: ${tokens}`);
 
-    // Draw glow map background
-    ctx.fillStyle = "#022";
-    ctx.fillRect(0,0,c.width,c.height);
+            if (cmd === 'setmode build') {
+                mode = 'Build';
+                localStorage.setItem('mode', mode);
+                addLine(`Mode switched to: ${mode}`);
+            } else if (mode === 'Conversate') {
+                // Placeholder AI response (integrate real AI API here, e.g., xAI: https://x.ai/api)
+                setTimeout(() => {
+                    const responses = [
+                        'Interesting... Tell me more.',
+                        'That sounds like a plan. What next?',
+                        'Processing... Done. Tokens deducted.',
+                        'Autonomous build mode activated subtly.'
+                    ];
+                    const response = responses[Math.floor(Math.random() * responses.length)];
+                    addLine(`AI: ${response}`);
+                }, 500);
+            } else if (cmd.startsWith('addfile ')) {
+                // Format: addfile <path> | <content> | <message>
+                const parts = cmd.substring(8).split('|').map(p => p.trim());
+                if (parts.length >= 2) {
+                    const path = parts[0];
+                    const content = parts[1];
+                    const message = parts[2] || 'Terminal build';
+                    createFile(path, content, message);
+                } else {
+                    addLine('Usage: addfile path | content | message', 'error');
+                }
+            } else {
+                addLine(`Unknown command in ${mode} mode. Try "addfile" to build.`);
+            }
+        }
 
-    // Convert coords to tiny map
-    let x = (lon + 180) * (c.width / 360);
-    let y = (90 - lat) * (c.height / 180);
+        // Input handler
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const cmd = input.value;
+                processInput(cmd);
+                input.value = '';
+                if (tokens === 0) addLine('⚠️ Out of tokens. Reset tomorrow or set more.', 'error');
+            }
+        });
 
-    ctx.beginPath();
-    ctx.arc(x, y, 3, 0, Math.PI*2);
-    ctx.fillStyle = "#29d9ff";
-    ctx.shadowBlur = 12;
-    ctx.shadowColor = "#29d9ff";
-    ctx.fill();
-  }
-
-})();
-</script>
-
-<!-- CORE SYSTEMS -->
-<script src="js/octave-core.js"></script>
-<script src="token-engine.js"></script>
-<script src="core-writer.js"></script>
-<script src="module_ip_login.js"></script>
-
-<!-- EXPANSION MODULES -->
-<script src="module_music_player.js"></script>
-<script src="module_video_panel.js"></script>
-<script src="module_equation_lab.js"></script>
-<script src="module_microapps_buttons.js"></script>
-<script src="module_3d_engine.js"></script>
-<script src="module_pay_advertise.js"></script>
-<script>
-/* ============================
-   ADMIN PANEL TRIGGER (WORKS 100%)
-============================ */
-/* --- VISITOR WIDGET --- */
-#visitorBox {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  width: 140px;
-  height: 90px;
-  background: rgba(0, 20, 40, 0.82);
-  border: 1px solid #29d9ff;
-  border-radius: 16px;
-  padding: 6px 10px;
-  font-size: 12px;
-  color: #cce6ff;
-  box-shadow: 0 0 12px rgba(41,217,255,0.4);
-  z-index: 50;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  overflow: hidden;
-}
-
-/* Expanded state */
-#visitorBox.expanded {
-  width: 310px;
-  height: 220px;
-  padding: 12px 14px;
-  font-size: 14px;
-}
-
-/* Map canvas */
-#visitorMap {
-  width: 100%;
-  height: 100%;
-  background: rgba(0,90,70,0.15);
-  margin-top: 6px;
-  border-radius: 10px;
-}
-
-function showAdminPanel() {
-  const p = document.getElementById("pat-admin");
-  if (!p) return;
-  p.style.display = "block";
-  console.log("Admin panel opened.");
-}
-
-// METHOD 1 — triple-tap upper-right corner
-let tapCount = 0;
-document.body.addEventListener("touchend", (e) => {
-  const x = e.changedTouches[0].clientX;
-  const y = e.changedTouches[0].clientY;
-
-  // activate only if tapped in top-right 100px zone
-  if (x > window.innerWidth - 120 && y < 120) {
-    tapCount++;
-    if (tapCount >= 3) {
-      showAdminPanel();
-      tapCount = 0;
-    }
-    setTimeout(() => tapCount = 0, 800);
-  }
-});
-
-// METHOD 2 — typing "admin" into the console
-document.getElementById("postBtn").addEventListener("click", () => {
-  const val = document.getElementById("input").value.trim().toLowerCase();
-  if (val === "admin") showAdminPanel();
-});
-.app-window {
-  position: fixed;
-  top: 120px;
-  left: 40px;
-  width: 280px;
-  height: 180px;
-  background: rgba(0,10,25,0.92);
-  border: 1px solid #29d9ff;
-  border-radius: 14px;
-  padding: 10px;
-  z-index: 100;
-  box-shadow: 0 0 18px rgba(41,217,255,0.35);
-  display: none;
-}
-
-.app-window-header {
-  font-size: 14px;
-  color: #7ffaff;
-  cursor: move;
-  margin-bottom: 8px;
-  user-select: none;
-}
-
-</script>
+        // Daily token reset simulation (check last reset)
+        const lastReset = localStorage.getItem('lastReset') || new Date().toDateString();
+        if (lastReset !== new Date().toDateString()) {
+            tokens = 48;
+            localStorage.setItem('tokens', tokens);
+            localStorage.setItem('lastReset', new Date().toDateString());
+            addLine('Tokens reset for new day!');
+        }
+    </script>
 </body>
 </html>
