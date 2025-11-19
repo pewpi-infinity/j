@@ -315,5 +315,72 @@
   renderList();
 })();
 </script>
+<!-- MODULE: Hamburger Storage Drawer -->
+<style>
+  #hamburgerBtn {
+    position: fixed; top: 20px; left: 20px;
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: #0b162ecc;
+    border: 1px solid #29d9ff;
+    color: #29d9ff; font-size: 24px;
+    cursor: pointer; z-index: 900;
+  }
+  #drawer {
+    position: fixed; top: 0; left: 0;
+    width: 260px; height: 100%;
+    background: #020712f7;
+    border-right: 1px solid #29d9ff60;
+    transform: translateX(-100%);
+    transition: 0.25s ease;
+    z-index: 899; padding: 20px;
+    overflow-y: auto;
+  }
+  #drawer.open { transform: translateX(0); }
+  #drawer h3 { margin-top: 26px; }
+  #drawer .file-entry { padding: 6px 0; cursor:pointer; }
+</style>
+
+<button id="hamburgerBtn">☰</button>
+<div id="drawer">
+  <h2>Storage</h2>
+  <div id="drawerAudio"></div>
+  <div id="drawerVideo"></div>
+  <div id="drawerGames"></div>
+</div>
+
+<script>
+(function(){
+  const btn=document.getElementById("hamburgerBtn");
+  const dr=document.getElementById("drawer");
+
+  btn.onclick = ()=> dr.classList.toggle("open");
+
+  function loadDrawer(){
+    const store = JSON.parse(localStorage.getItem("inf_media_store")||"[]");
+    const A=document.getElementById("drawerAudio");
+    const V=document.getElementById("drawerVideo");
+    const G=document.getElementById("drawerGames");
+
+    A.innerHTML="<h3>Audio</h3>";
+    V.innerHTML="<h3>Video</h3>";
+    G.innerHTML="<h3>Games</h3>";
+
+    store.forEach(f=>{
+      let target = f.name.match(/\.(mp3|wav|ogg)$/i) ? A :
+                   f.name.match(/\.(mp4|webm|mkv)$/i) ? V : G;
+
+      const el=document.createElement("div");
+      el.className="file-entry";
+      el.textContent=f.name;
+      el.onclick = ()=> navigator.clipboard.writeText(f.data);
+      target.appendChild(el);
+    });
+  }
+
+  loadDrawer();
+  window.addEventListener("storage", loadDrawer);
+})();
+</script>
 </body>
 </html>
