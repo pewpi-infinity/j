@@ -985,5 +985,27 @@
   const oldUploader = document.querySelector("input[id='uploadMedia'], input[id='mediaUpload']");
   if (oldUploader) oldUploader.remove();
 </script>
+<style>
+  /* FORCE MEDIA SYSTEM TO FLOAT ABOVE EVERYTHING */
+  #infFloatPlayer,
+  #infUploadFP,
+  #infDrawer,
+  #infDrawerBtn {
+    position: fixed !important;
+    z-index: 999999999 !important;
+  }
+
+  /* Fix Infinity OS fullscreen container blocking layers */
+  body, html {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  /* If Infinity uses a root wrapper, unlock it: */
+  .shell, .terminal-card, main, #app, #root {
+    overflow: visible !important;
+    position: relative !important;
+  }
+</style>
 </body>
 </html>
