@@ -348,6 +348,40 @@ function loadMemory() {
     }
 }
 
+/* === PAT ADMIN PANEL HANDLER =========================== */
+
+let patTapCount = 0;
+let patLastTap = 0;
+
+function adminTapTrigger() {
+  const now = Date.now();
+  if (now - patLastTap > 800) patTapCount = 0;
+  patLastTap = now;
+
+  patTapCount++;
+  if (patTapCount >= 5) {
+    document.getElementById("pat-admin").style.display = "block";
+    patTapCount = 0;
+  }
+}
+
+const walletBtn = document.getElementById("walletBtn");
+if (walletBtn) walletBtn.addEventListener("click", adminTapTrigger);
+
+function savePAT() {
+  const val = document.getElementById("pat-input").value.trim();
+  if (!val) {
+    document.getElementById("pat-status").innerText = "Empty.";
+    return;
+  }
+  localStorage.setItem("octave_pat", val);
+  document.getElementById("pat-status").innerText = "PAT Saved!";
+  setTimeout(() => {
+    document.getElementById("pat-admin").style.display = "none";
+  }, 1000);
+}
+
+
 window.addEventListener("beforeunload", saveMemory);
 window.addEventListener("load", loadMemory);
 
