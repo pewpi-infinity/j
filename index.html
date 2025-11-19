@@ -436,5 +436,200 @@
 
 })();
 </script>
+<!-- MEDIA SYSTEM v2 — Audio + Video + Storage (Stable Build) -->
+
+<style>
+  /* FONT RESET FOR THIS MODULE ONLY */
+  .media-safe, .media-safe * {
+    font-family: system-ui, sans-serif !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+  }
+
+  #mediaMenuBtn {
+    position: fixed; top: 20px; left: 20px;
+    width: 48px; height: 48px;
+    background: #0b162ecc;
+    border: 1px solid #29d9ff;
+    color: #29d9ff;
+    border-radius: 10px;
+    font-size: 24px;
+    cursor: pointer; z-index: 9999;
+  }
+
+  #mediaDrawer {
+    position: fixed; top: 0; left: 0;
+    width: 260px; height: 100%;
+    background: #020712f8;
+    border-right: 1px solid #29d9ff50;
+    padding: 20px;
+    transform: translateX(-100%);
+    transition: 0.25s ease;
+    z-index: 9998;
+  }
+  #mediaDrawer.open { transform: translateX(0); }
+
+  #mediaDrawer h2, #mediaDrawer h3 {
+    color: #29d9ff; margin-top: 20px;
+  }
+
+  .media-file {
+    padding: 6px 0;
+    border-bottom: 1px solid #133;
+    cursor: pointer;
+    color: #d7f2ff;
+  }
+
+  /* DOCK BUTTON */
+  #dockBtn {
+    position: fixed; bottom: 25px; right: 25px;
+    width: 65px; height: 65px;
+    border-radius: 50%;
+    background: #29d9ff;
+    border: none;
+    box-shadow: 0 0 18px #29d9ff;
+    font-size: 28px;
+    color: #001019;
+    font-weight: 900;
+    cursor: pointer;
+    z-index: 9999;
+  }
+
+  /* DOCK PANEL */
+  #dockPanel {
+    position: fixed; bottom: 0; left: 0;
+    width: 100%; height: 55%;
+    background: #020712ef;
+    border-top: 1px solid #29d9ff40;
+    padding: 18px;
+    display: none;
+    z-index: 9998;
+    overflow-y: auto;
+  }
+
+  #mediaPlayer, #audioPlayer {
+    width: 100%;
+    margin-top: 14px;
+    border-radius: 10px;
+    background: #000;
+  }
+
+</style>
+
+<!-- HAMBURGER BUTTON -->
+<button id="mediaMenuBtn" class="media-safe">☰</button>
+
+<!-- STORAGE DRAWER -->
+<div id="mediaDrawer" class="media-safe">
+  <h2>Storage</h2>
+
+  <h3>Video</h3>
+  <div id="storageVideo"></div>
+
+  <h3>Audio</h3>
+  <div id="storageAudio"></div>
+
+  <h3>Other</h3>
+  <div id="storageOther"></div>
+</div>
+
+<!-- DOCK BUTTON -->
+<button id="dockBtn" class="media-safe">▶</button>
+
+<!-- MEDIA DOCK PANEL -->
+<div id="dockPanel" class="media-safe">
+  <h2 style="color:#29d9ff; margin-top:0;">Media Player</h2>
+
+  <input type="file" id="uploadMedia" accept="video/*,audio/*" />
+
+  <video id="mediaPlayer" controls></video>
+  <audio id="audioPlayer" controls></audio>
+</div>
+
+<script>
+(function(){
+
+  const menuBtn = document.getElementById("mediaMenuBtn");
+  const drawer = document.getElementById("mediaDrawer");
+
+  const dockBtn = document.getElementById("dockBtn");
+  const dock = document.getElementById("dockPanel");
+
+  const upload = document.getElementById("uploadMedia");
+  const vPlayer = document.getElementById("mediaPlayer");
+  const aPlayer = document.getElementById("audioPlayer");
+
+  const storeKey = "inf_media_store_v2";
+  let store = JSON.parse(localStorage.getItem(storeKey) || "[]");
+
+  const vidBox = document.getElementById("storageVideo");
+  const audBox = document.getElementById("storageAudio");
+  const othBox = document.getElementById("storageOther");
+
+  /* HAMBURGER TOGGLE */
+  menuBtn.onclick = () => drawer.classList.toggle("open");
+
+  /* DOCK PANEL */
+  dockBtn.onclick = () => {
+    dock.style.display = (dock.style.display==="none"||!dock.style.display) ? "block" : "none";
+  };
+
+  /* RENDER STORAGE */
+  function render(){
+    vidBox.innerHTML = "";
+    audBox.innerHTML = "";
+    othBox.innerHTML = "";
+
+    store.forEach(file=>{
+      let el=document.createElement("div");
+      el.className="media-file";
+      el.textContent=file.name;
+
+      el.onclick = ()=>{
+        if(file.type.startsWith("video")){
+          aPlayer.style.display="none";
+          vPlayer.style.display="block";
+          vPlayer.src=file.data;
+        } else if(file.type.startsWith("audio")){
+          vPlayer.style.display="none";
+          aPlayer.style.display="block";
+          aPlayer.src=file.data;
+        }
+      };
+
+      if(file.type.startsWith("video")) vidBox.appendChild(el);
+      else if(file.type.startsWith("audio")) audBox.appendChild(el);
+      else othBox.appendChild(el);
+    });
+  }
+
+  render();
+
+  /* UPLOAD HANDLER */
+  upload.onchange = e=>{
+    const file = e.target.files[0];
+    if(!file) return;
+
+    const rd = new FileReader();
+    rd.onload = ()=>{
+      const item = { name:file.name, type:file.type, data:rd.result };
+      store.push(item);
+      localStorage.setItem(storeKey, JSON.stringify(store));
+      render();
+
+      if(file.type.startsWith("video")){
+        vPlayer.style.display="block"; aPlayer.style.display="none";
+        vPlayer.src = rd.result;
+      } else if(file.type.startsWith("audio")){
+        aPlayer.style.display="block"; vPlayer.style.display="none";
+        aPlayer.src = rd.result;
+      }
+    };
+
+    rd.readAsDataURL(file);
+  };
+
+})();
+</script>
 </body>
 </html>
