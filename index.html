@@ -1,121 +1,245 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Infinity Octave OS</title>
-<style>
-  body{background:#000;color:#0f0;font:18px Courier;margin:0;overflow:hidden}
-  #t{height:60vh;overflow:auto;padding:20px}
-  #o{height:40vh;background:#000}
-  canvas{width:100%;height:100%;display:block}
-  input{background:none;border:none;color:#0f0;font:18px Courier;outline:none;width:90%}
-  .c{cursor:pointer;color:#ff0;text-decoration:underline}
-  .y{color:#ff0}
-  .g{color:#0f0}
-  .p{color:#f0f}
-  .blink{animation:b 1s steps(1) infinite}
-  @keyframes b{50%{opacity:0}}
-</style>
-</head>
-<body>
-<div id="t">
-<div id="out">
-<span style="color:#ff8c00;font-size:22px">INFINITY OCTAVE OS v∞</span><br><br>
-Rogers / Octave Conscious Core<br><br>
-Tokens: <span id="tok" class="y">48</span> | Visitors: <span id="vis" class="y">1</span><br><br>
-<span class="c" onclick="m('music')">Music</span> |
-<span class="c" onclick="m('video')">Movies</span> |
-<span class="c" onclick="alert('Grok integration coming')">Grok</span><br><br>
-<div id="log"></div>
-> <input id="i" autofocus><span class="blink">_</span>
-</div>
-</div>
-<div id="o"></div>
+  <meta charset="UTF-8" />
+  <title>Infinity Octave OS — Terminal v1</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<div id="mp" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;border:4px solid #0f0;padding:20px;width:90%;max-width:600px">
-<span style="float:right;color:#f00;cursor:pointer;font-size:24px" onclick="this.parentNode.style.display='none'">X</span>
-<h2 style="color:#0f0">Infinity Music Player</h2>
-<input type="file" id="mf" accept="audio/*"><br><br>
-<audio controls style="width:100%"></audio>
-</div>
-
-<div id="vp" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;border:4px solid #0f0;padding:20px;width:90%;max-width:600px">
-<span style="float:right;color:#f00;cursor:pointer;font-size:24px" onclick="this.parentNode.style.display='none'">X</span>
-<h2 style="color:#0f0">Infinity Movies</h2>
-<input type="file" id="vf" accept="video/*"><br><br>
-<video controls style="width:100%"></video>
-</div>
-
-<script>
-let tokens = parseInt(localStorage.getItem("tokens") || 48)
-let visitors = (parseInt(localStorage.getItem("visitors") || 0)) + 1
-localStorage.setItem("visitors", visitors)
-document.getElementById("tok").innerText = tokens
-document.getElementById("vis").innerText = visitors
-
-const input = document.getElementById("i")
-input.addEventListener("keydown", e => {
-  if(e.key === "Enter"){
-    let cmd = input.value.trim()
-    input.value = ""
-    if(cmd){
-      log("> " + cmd, "g")
-      if(cmd === "clear"){ document.getElementById("log").innerHTML = ""; return }
-      tokens = Math.max(0, tokens-1)
-      localStorage.setItem("tokens", tokens)
-      document.getElementById("tok").innerText = tokens
-      setTimeout(() => {
-        log("Rogers/Octave: Building " + cmd + "...", "p")
-        setTimeout(() => {
-          log("Worthy creation. +3 tokens", "y")
-          tokens += 3
-          localStorage.setItem("tokens", tokens)
-          document.getElementById("tok").innerText = tokens
-        }, 700)
-      }, 500)
+  <style>
+    :root {
+      --bg: #020712;
+      --panel: #050b18;
+      --border: #1b3d6b;
+      --accent: #29d9ff;
+      --text-main: #e9f4ff;
+      --text-soft: #a7c0e0;
+      --wallet: #21ff9c;
     }
-  }
-})
 
-function log(txt, color="g"){
-  let d = document.createElement("div")
-  d.className = color
-  d.innerHTML = txt
-  document.getElementById("log").appendChild(d)
-  document.getElementById("t").scrollTop = 999999
-}
+    * { box-sizing: border-box; font-family: system-ui, sans-serif; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #06142b 0, #020712 48%, #000 100%);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
 
-function m(t){
-  document.getElementById(t==='music'?'mp':'vp').style.display = "block"
-}
+    .shell { width: 100%; max-width: 960px; padding: 20px 14px 32px; }
 
-// Quantum orb
-const canvas = document.createElement("canvas")
-canvas.width = innerWidth
-canvas.height = innerHeight * 0.4
-document.getElementById("o").appendChild(canvas)
-const ctx = canvas.getContext("2d")
-let angle = 0
-function spin(){
-  ctx.fillStyle = "#000"
-  ctx.fillRect(0,0,canvas.width,canvas.height)
-  ctx.strokeStyle = "#0f0"
-  ctx.lineWidth = 3
-  angle += 0.01
-  for(let i = 0; i < 60; i++){
-    let r = 120 + Math.sin(angle + i) * 60
-    let x = canvas.width/2 + Math.cos(angle + i*0.8) * r
-    let y = canvas.height/2 + Math.sin(angle + i*1.2) * r
-    ctx.beginPath()
-    ctx.arc(x, y, 25 + Math.sin(angle*3 + i)*12, 0, Math.PI*2)
-    ctx.stroke()
-  }
-  requestAnimationFrame(spin)
-}
-spin()
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .brand-line { font-size: 13px; color: var(--accent); letter-spacing: 0.25em; }
+    .header-title { font-size: 24px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
 
-log("Quantum orb online", "g")
-log("Speak, creator.", "g")
-</script>
+    .portal-link { font-size: 13px; color: var(--text-soft); }
+    .portal-link::before { content: "⧉ "; }
+
+    .terminal-card {
+      background: radial-gradient(circle at top left, #0b1630, #050b18 48%, #020811);
+      border-radius: 22px;
+      padding: 18px 14px;
+      border: 1px solid rgba(45,120,210,0.6);
+      box-shadow: 0 0 45px rgba(0,0,0,0.7);
+    }
+
+    .button-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 16px; }
+    .pill-btn {
+      min-width: 120px; padding: 9px 16px;
+      background: rgba(5,15,30,0.85);
+      border: 1px solid rgba(104,168,255,0.6);
+      border-radius: 999px;
+      color: #dff3ff;
+      cursor: pointer;
+      font-size: 14px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .pill-btn.active { border-color: var(--accent); box-shadow: 0 0 12px var(--accent); }
+
+    .pill-btn.wallet { border-color: var(--wallet); color: var(--wallet); }
+    .pill-btn.wallet::before { content: "∞ "; }
+
+    .status-row {
+      display: flex; justify-content: space-between;
+      padding: 0 4px; margin-bottom: 10px;
+      font-size: 13px; color: var(--text-soft);
+    }
+    #modeLabel { color: var(--accent); }
+
+    .token-pill {
+      padding: 3px 8px; border-radius: 999px;
+      border: 1px solid #21ff9c;
+      background: rgba(0,255,163,0.12);
+      color: var(--wallet); font-weight: 600;
+    }
+
+    .console {
+      height: 260px;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(35,70,130,0.7);
+      border-radius: 14px;
+      overflow-y: auto;
+      padding: 10px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    .console-line { margin-bottom: 5px; }
+    .console-line.system { color: #93b7ff; }
+    .console-line.you { color: #7ef9ff; }
+    .console-line.ai { color: #ffd997; }
+
+    .input-row { display: flex; gap: 8px; align-items: center; }
+    .input-box {
+      flex: 1;
+      background: rgba(0,10,30,0.8);
+      border: 1px solid rgba(40,110,200,0.8);
+      border-radius: 999px;
+      padding: 8px 14px;
+    }
+    .input-box input { background: transparent; border: none; color: var(--text-main); width: 100%; }
+
+    .post-btn {
+      padding: 9px 22px;
+      background: linear-gradient(to bottom, #21ff9c, #15996c);
+      border-radius: 999px;
+      border: none;
+      color: #00130a;
+      font-weight: 800;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    /* Visitor Widget (small) */
+    #visitorBox {
+      position: fixed;
+      top: 18px; right: 18px;
+      width: 145px; height: 85px;
+      background: rgba(0,20,40,0.82);
+      border: 1px solid #29d9ff;
+      border-radius: 14px;
+      padding: 8px 10px;
+      font-size: 12px;
+      box-shadow: 0 0 16px rgba(41,217,255,0.4);
+      z-index: 999;
+      transition: all 0.2s ease;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    #visitorBox.expanded {
+      width: 300px; height: 220px; padding: 12px 14px;
+    }
+
+    #visitorMap {
+      width: 100%;
+      height: 110px;
+      margin-top: 6px;
+      background: rgba(0,60,70,0.15);
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+    <header>
+      <div>
+        <div class="brand-line">INFINITY OCTAVE OS</div>
+        <div class="header-title">Infinity Octave OS — Terminal v1</div>
+      </div>
+      <div class="portal-link"><span>∞ Infinity Portal</span></div>
+    </header>
+
+    <main>
+      <section class="terminal-card">
+        <div class="button-row">
+          <button class="pill-btn active" data-mode-btn="conversate">Conversate</button>
+          <button class="pill-btn" data-mode-btn="secret">Secret Encode</button>
+          <button class="pill-btn" data-mode-btn="retrieve">Retrieve</button>
+          <button class="pill-btn" data-mode-btn="builder">Builder</button>
+          <button class="pill-btn" data-mode-btn="post">Post</button>
+          <button class="pill-btn wallet">Wallet</button>
+        </div>
+
+        <div class="status-row">
+          <span>Mode: <strong id="modeLabel">Conversate</strong></span>
+          <span class="token-pill"><span id="tokenCount">10</span> INF</span>
+        </div>
+
+        <div class="console" id="console"></div>
+
+        <div class="input-row">
+          <div class="input-box">
+            <input id="input" placeholder="Hello Rogers..." autocomplete="off" />
+          </div>
+          <button class="post-btn" id="postBtn">Post</button>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- Visitor Widget -->
+  <div id="visitorBox">
+    <div><strong>Visitors:</strong> <span id="viewCount">0</span></div>
+    <div id="visitorLoc" style="margin-top:4px;"></div>
+    <canvas id="visitorMap"></canvas>
+  </div>
+
+  <!-- Core Systems -->
+  <script src="js/octave-core.js"></script>
+  <script src="token-engine.js"></script>
+  <script src="core-writer.js"></script>
+  <script src="module_ip_login.js"></script>
+
+  <!-- Expansion Modules -->
+  <script src="module_music_player.js"></script>
+  <script src="module_video_panel.js"></script>
+  <script src="module_equation_lab.js"></script>
+  <script src="module_microapps_buttons.js"></script>
+  <script src="module_3d_engine.js"></script>
+  <script src="module_pay_advertise.js"></script>
+
+  <script>
+    /* Visitor Counter */
+    (async function(){
+      let count = Number(localStorage.getItem("infinity_page_views") || 0);
+      count++;
+      localStorage.setItem("infinity_page_views", count);
+      document.getElementById("viewCount").textContent = count;
+
+      async function getGeo(){
+        try { let r = await fetch("https://ipapi.co/json/"); return r.json(); }
+        catch { return null; }
+      }
+
+      const geo = await getGeo();
+      if(geo){
+        document.getElementById("visitorLoc").textContent =
+          `${geo.city}, ${geo.region}, ${geo.country_name}`;
+        drawDot(geo.latitude, geo.longitude);
+      }
+
+      function drawDot(lat, lon){
+        const c = document.getElementById("visitorMap");
+        const ctx = c.getContext("2d");
+        ctx.fillStyle = "#011";
+        ctx.fillRect(0,0,c.width,c.height);
+        let x = (lon + 180) * (c.width / 360);
+        let y = (90 - lat) * (c.height / 180);
+        ctx.beginPath();
+        ctx.arc(x,y,4,0,Math.PI*2);
+        ctx.fillStyle = "#29d9ff";
+        ctx.fill();
+      }
+
+      document.getElementById("visitorBox").addEventListener("click",()=>{
+        visitorBox.classList.toggle("expanded");
+      });
+
+    })();
+  </script>
+
 </body>
 </html>
