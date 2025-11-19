@@ -839,5 +839,143 @@
 
 })();
 </script>
+<!-- ▬▬▬ INFINITY FLOATING MEDIA VIEWER ▬▬▬ -->
+<style>
+  #infFloatPlayer {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 320px;
+    height: 200px;
+    background: #020712f0;
+    border: 2px solid #29d9ff;
+    border-radius: 14px;
+    z-index: 999999;
+    display: none;
+    resize: both;
+    overflow: hidden;
+  }
+
+  #infFloatHeader {
+    width: 100%;
+    height: 36px;
+    background: linear-gradient(145deg, #29d9ff, #147a96);
+    cursor: move;
+    color: #001018;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    font-weight: 700;
+  }
+
+  #infCloseFP {
+    cursor:pointer;
+    font-size: 20px;
+  }
+
+  #infVideoFP, #infAudioFP {
+    width: 100%;
+    height: calc(100% - 36px);
+    background: #000;
+  }
+
+  #infUploadFP {
+    position: fixed;
+    bottom: 20px;
+    right: 350px;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border:none;
+    background: #29d9ff;
+    color:#001018;
+    font-size:28px;
+    font-weight:900;
+    cursor:pointer;
+    z-index:999999;
+    box-shadow:0 0 18px #29d9ff;
+  }
+</style>
+
+<button id="infUploadFP">+</button>
+
+<div id="infFloatPlayer">
+  <div id="infFloatHeader">
+    <span>Infinity Player</span>
+    <span id="infCloseFP">✕</span>
+  </div>
+  <video id="infVideoFP" controls style="display:none;"></video>
+  <audio id="infAudioFP" controls style="display:none;"></audio>
+</div>
+
+<script>
+(function(){
+  const fp = document.getElementById("infFloatPlayer");
+  const hdr = document.getElementById("infFloatHeader");
+  const close = document.getElementById("infCloseFP");
+  const uploadBtn = document.getElementById("infUploadFP");
+  const vid = document.getElementById("infVideoFP");
+  const aud = document.getElementById("infAudioFP");
+
+  let store = JSON.parse(localStorage.getItem("inf_library")||"[]");
+
+  uploadBtn.onclick = ()=>{
+    let uploader = document.createElement("input");
+    uploader.type="file";
+    uploader.accept="video/*,audio/*";
+    uploader.onchange = e=>{
+      let file = e.target.files[0];
+      if(!file) return;
+
+      let rd=new FileReader();
+      rd.onload = ()=>{
+        
+        // Save to Infinity Library
+        let item = {name:file.name, type:file.type, data:rd.result};
+        store.push(item);
+        localStorage.setItem("inf_library",JSON.stringify(store));
+
+        // Load into player
+        fp.style.display="block";
+
+        if(file.type.startsWith("video")){
+          vid.style.display="block";
+          aud.style.display="none";
+          vid.src = rd.result;
+          vid.play();
+        } else {
+          vid.style.display="none";
+          aud.style.display="block";
+          aud.src = rd.result;
+          aud.play();
+        }
+      };
+      rd.readAsDataURL(file);
+    };
+    uploader.click();
+  };
+
+  close.onclick = ()=> fp.style.display="none";
+
+  // Make window draggable
+  let offsetX, offsetY, dragging=false;
+
+  hdr.addEventListener("mousedown",e=>{
+    dragging=true;
+    offsetX=e.clientX - fp.offsetLeft;
+    offsetY=e.clientY - fp.offsetTop;
+  });
+
+  document.addEventListener("mouseup",()=> dragging=false);
+
+  document.addEventListener("mousemove",e=>{
+    if(!dragging) return;
+    fp.style.left = (e.clientX - offsetX)+"px";
+    fp.style.top = (e.clientY - offsetY)+"px";
+  });
+
+})();
+</script>
 </body>
 </html>
