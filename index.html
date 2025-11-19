@@ -1,831 +1,128 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Infinity Octave OS — Terminal v1</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Infinity Mini Player Test</title>
 
-  <style>
-    :root {
-      --bg: #020712;
-      --panel: #050b18;
-      --border: #1b3d6b;
-      --accent: #29d9ff;
-      --text-main: #e9f4ff;
-      --text-soft: #a7c0e0;
-      --wallet: #21ff9c;
-    }
+<style>
+body {
+  background: #020712;
+  margin: 0;
+}
 
-    * { box-sizing: border-box; font-family: system-ui, sans-serif; }
-    body {
-      margin: 0;
-      background: radial-gradient(circle at top, #06142b 0, #020712 48%, #000 100%);
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
-      min-height: 100vh;
-    }
+/* Floating Mini Player Container */
+#miniPlayer {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 240px;
+  height: 135px;
+  background: #000;
+  border: 2px solid #00eaff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 20px #00eaff99;
+  display: none;
+  z-index: 99999;
+}
 
-    .shell { width: 100%; max-width: 960px; padding: 20px 14px 32px; }
+/* Video inside the mini player */
+#miniVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
 
-    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-    .brand-line { font-size: 13px; color: var(--accent); letter-spacing: 0.25em; }
-    .header-title { font-size: 24px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+/* Resize handle */
+#resizeHandle {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  right: 0;
+  bottom: 0;
+  background: #00eaff;
+  border-top-left-radius: 8px;
+  cursor: se-resize;
+}
 
-    .portal-link { font-size: 13px; color: var(--text-soft); }
-    .portal-link::before { content: "⧉ "; }
-
-    .terminal-card {
-      background: radial-gradient(circle at top left, #0b1630, #050b18 48%, #020811);
-      border-radius: 22px;
-      padding: 18px 14px;
-      border: 1px solid rgba(45,120,210,0.6);
-      box-shadow: 0 0 45px rgba(0,0,0,0.7);
-    }
-
-    .button-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 16px; }
-    .pill-btn {
-      min-width: 120px; padding: 9px 16px;
-      background: rgba(5,15,30,0.85);
-      border: 1px solid rgba(104,168,255,0.6);
-      border-radius: 999px;
-      color: #dff3ff;
-      cursor: pointer;
-      font-size: 14px;
-      text-transform: uppercase;
-      font-weight: 600;
-    }
-    .pill-btn.active { border-color: var(--accent); box-shadow: 0 0 12px var(--accent); }
-
-    .pill-btn.wallet { border-color: var(--wallet); color: var(--wallet); }
-    .pill-btn.wallet::before { content: "∞ "; }
-
-    .status-row {
-      display: flex; justify-content: space-between;
-      padding: 0 4px; margin-bottom: 10px;
-      font-size: 13px; color: var(--text-soft);
-    }
-    #modeLabel { color: var(--accent); }
-
-    .token-pill {
-      padding: 3px 8px; border-radius: 999px;
-      border: 1px solid #21ff9c;
-      background: rgba(0,255,163,0.12);
-      color: var(--wallet); font-weight: 600;
-    }
-
-    .console {
-      height: 260px;
-      background: rgba(0,0,0,0.5);
-      border: 1px solid rgba(35,70,130,0.7);
-      border-radius: 14px;
-      overflow-y: auto;
-      padding: 10px;
-      margin-bottom: 12px;
-      font-size: 14px;
-    }
-    .console-line { margin-bottom: 5px; }
-    .console-line.system { color: #93b7ff; }
-    .console-line.you { color: #7ef9ff; }
-    .console-line.ai { color: #ffd997; }
-
-    .input-row { display: flex; gap: 8px; align-items: center; }
-    .input-box {
-      flex: 1;
-      background: rgba(0,10,30,0.8);
-      border: 1px solid rgba(40,110,200,0.8);
-      border-radius: 999px;
-      padding: 8px 14px;
-    }
-    .input-box input { background: transparent; border: none; color: var(--text-main); width: 100%; }
-
-    .post-btn {
-      padding: 9px 22px;
-      background: linear-gradient(to bottom, #21ff9c, #15996c);
-      border-radius: 999px;
-      border: none;
-      color: #00130a;
-      font-weight: 800;
-      text-transform: uppercase;
-      cursor: pointer;
-    }
-
-    /* Visitor Widget (small) */
-    #visitorBox {
-      position: fixed;
-      top: 18px; right: 18px;
-      width: 145px; height: 85px;
-      background: rgba(0,20,40,0.82);
-      border: 1px solid #29d9ff;
-      border-radius: 14px;
-      padding: 8px 10px;
-      font-size: 12px;
-      box-shadow: 0 0 16px rgba(41,217,255,0.4);
-      z-index: 999;
-      transition: all 0.2s ease;
-      overflow: hidden;
-      cursor: pointer;
-    }
-
-    #visitorBox.expanded {
-      width: 300px; height: 220px; padding: 12px 14px;
-    }
-
-    #visitorMap {
-      width: 100%;
-      height: 110px;
-      margin-top: 6px;
-      background: rgba(0,60,70,0.15);
-      border-radius: 10px;
-    }
-  </style>
+/* Upload button */
+#uploadBtn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  padding: 12px 16px;
+  background: #00eaff;
+  border-radius: 10px;
+  font-weight: bold;
+  color: #000;
+  border: none;
+}
+</style>
 </head>
-
 <body>
-  <div class="shell">
-    <header>
-      <div>
-        <div class="brand-line">INFINITY OCTAVE OS</div>
-        <div class="header-title">Infinity Octave OS — Terminal v1</div>
-      </div>
-      <div class="portal-link"><span>∞ Infinity Portal</span></div>
-    </header>
 
-    <main>
-      <section class="terminal-card">
-        <div class="button-row">
-          <button class="pill-btn active" data-mode-btn="conversate">Conversate</button>
-          <button class="pill-btn" data-mode-btn="secret">Secret Encode</button>
-          <button class="pill-btn" data-mode-btn="retrieve">Retrieve</button>
-          <button class="pill-btn" data-mode-btn="builder">Builder</button>
-          <button class="pill-btn" data-mode-btn="post">Post</button>
-          <button class="pill-btn wallet">Wallet</button>
-        </div>
+<input type="file" id="uploadBtn" accept="video/*">
 
-        <div class="status-row">
-          <span>Mode: <strong id="modeLabel">Conversate</strong></span>
-          <span class="token-pill"><span id="tokenCount">10</span> INF</span>
-        </div>
-
-        <div class="console" id="console"></div>
-
-        <div class="input-row">
-          <div class="input-box">
-            <input id="input" placeholder="Hello Rogers..." autocomplete="off" />
-          </div>
-          <button class="post-btn" id="postBtn">Post</button>
-        </div>
-
-      </section>
-    </main>
-  </div>
-
-  <!-- Core Systems -->
-  <script src="js/octave-core.js"></script>
-  <script src="token-engine.js"></script>
-  <script src="core-writer.js"></script>
-  <script src="module_ip_login.js"></script>
-
-  <!-- Expansion Modules -->
-  <script src="module_music_player.js"></script>
-  <script src="module_video_panel.js"></script>
-  <script src="module_equation_lab.js"></script>
-  <script src="module_microapps_buttons.js"></script>
-  <script src="module_3d_engine.js"></script>
-  <script src="module_pay_advertise.js"></script>
-
-  <script>
-    /* Visitor Counter */
-    (async function(){
-      let count = Number(localStorage.getItem("infinity_page_views") || 0);
-      count++;
-      localStorage.setItem("infinity_page_views", count);
-      document.getElementById("viewCount").textContent = count;
-
-      async function getGeo(){
-        try { let r = await fetch("https://ipapi.co/json/"); return r.json(); }
-        catch { return null; }
-      }
-
-      const geo = await getGeo();
-      if(geo){
-        document.getElementById("visitorLoc").textContent =
-          `${geo.city}, ${geo.region}, ${geo.country_name}`;
-        drawDot(geo.latitude, geo.longitude);
-      }
-
-      function drawDot(lat, lon){
-        const c = document.getElementById("visitorMap");
-        const ctx = c.getContext("2d");
-        ctx.fillStyle = "#011";
-        ctx.fillRect(0,0,c.width,c.height);
-        let x = (lon + 180) * (c.width / 360);
-        let y = (90 - lat) * (c.height / 180);
-        ctx.beginPath();
-        ctx.arc(x,y,4,0,Math.PI*2);
-        ctx.fillStyle = "#29d9ff";
-        ctx.fill();
-      }
-
-      document.getElementById("visitorBox").addEventListener("click",()=>{
-        visitorBox.classList.toggle("expanded");
-      });
-
-    })();
-  </script>
-<script src="module_media_dock.js"></script>
-<!-- MODULE: Video Player Dock -->
-<style>
-  #mediaDockBtn {
-    position: fixed; bottom: 22px; right: 22px;
-    background: #29d9ff; color: #001018;
-    border-radius: 50%; width: 58px; height: 58px;
-    border: none; font-size: 26px; font-weight: 900;
-    cursor: pointer; z-index: 999;
-    box-shadow: 0 0 18px #29d9ff;
-  }
-
-  #mediaDockPanel {
-    position: fixed; bottom: 0; left: 0;
-    width: 100%; height: 60%;
-    background: #020712ef;
-    border-top: 1px solid #29d9ff80;
-    display: none; padding: 18px;
-    box-shadow: 0 -10px 30px rgba(0,0,0,0.8);
-    z-index: 998; overflow-y: auto;
-  }
-
-  #mediaList div {
-    padding: 8px 0; cursor: pointer;
-    color: #a7c0e0; border-bottom: 1px solid #133;
-  }
-</style>
-
-<button id="mediaDockBtn">▶</button>
-
-<div id="mediaDockPanel">
-  <h2 style="margin-top:0;">Media Player</h2>
-
-  <input type="file" id="mediaUpload" accept="video/*,audio/*" />
-
-  <video id="mediaPlayer" controls style="width:100%; margin-top:14px;"></video>
-
-  <h3>Stored Files</h3>
-  <div id="mediaList"></div>
-</div>
-
-<script>
-(function(){
-  const dockBtn = document.getElementById("mediaDockBtn");
-  const panel = document.getElementById("mediaDockPanel");
-  const upload = document.getElementById("mediaUpload");
-  const player = document.getElementById("mediaPlayer");
-  const list = document.getElementById("mediaList");
-
-  let store = JSON.parse(localStorage.getItem("inf_media_store")||"[]");
-
-  function renderList(){
-    list.innerHTML="";
-    store.forEach((item,i)=>{
-      const el=document.createElement("div");
-      el.textContent=item.name;
-      el.onclick=()=>{ player.src=item.data; };
-      list.appendChild(el);
-    });
-  }
-
-  dockBtn.onclick = ()=>{ 
-    panel.style.display = (panel.style.display==="none"||!panel.style.display)
-      ? "block" : "none"; 
-  };
-
-  upload.onchange = e=>{
-    const file = e.target.files[0];
-    if(!file) return;
-    const rd = new FileReader();
-    rd.onload = ()=>{
-      store.push({ name:file.name, data: rd.result });
-      localStorage.setItem("inf_media_store", JSON.stringify(store));
-      renderList();
-      player.src = rd.result;
-    };
-    rd.readAsDataURL(file);
-  };
-
-  renderList();
-})();
-</script>
-<!-- MODULE: Hamburger Storage Drawer -->
-<style>
-  #hamburgerBtn {
-    position: fixed; top: 20px; left: 20px;
-    width: 44px; height: 44px;
-    border-radius: 12px;
-    background: #0b162ecc;
-    border: 1px solid #29d9ff;
-    color: #29d9ff; font-size: 24px;
-    cursor: pointer; z-index: 900;
-  }
-  #drawer {
-    position: fixed; top: 0; left: 0;
-    width: 260px; height: 100%;
-    background: #020712f7;
-    border-right: 1px solid #29d9ff60;
-    transform: translateX(-100%);
-    transition: 0.25s ease;
-    z-index: 899; padding: 20px;
-    overflow-y: auto;
-  }
-  #drawer.open { transform: translateX(0); }
-  #drawer h3 { margin-top: 26px; }
-  #drawer .file-entry { padding: 6px 0; cursor:pointer; }
-</style>
-
-<button id="hamburgerBtn">☰</button>
-<div id="drawer">
-  <h2>Storage</h2>
-  <div id="drawerAudio"></div>
-  <div id="drawerVideo"></div>
-  <div id="drawerGames"></div>
-</div>
-
-<script>
-(function(){
-  const btn=document.getElementById("hamburgerBtn");
-  const dr=document.getElementById("drawer");
-
-  btn.onclick = ()=> dr.classList.toggle("open");
-
-  function loadDrawer(){
-    const store = JSON.parse(localStorage.getItem("inf_media_store")||"[]");
-    const A=document.getElementById("drawerAudio");
-    const V=document.getElementById("drawerVideo");
-    const G=document.getElementById("drawerGames");
-
-    A.innerHTML="<h3>Audio</h3>";
-    V.innerHTML="<h3>Video</h3>";
-    G.innerHTML="<h3>Games</h3>";
-
-    store.forEach(f=>{
-      let target = f.name.match(/\.(mp3|wav|ogg)$/i) ? A :
-                   f.name.match(/\.(mp4|webm|mkv)$/i) ? V : G;
-
-      const el=document.createElement("div");
-      el.className="file-entry";
-      el.textContent=f.name;
-      el.onclick = ()=> navigator.clipboard.writeText(f.data);
-      target.appendChild(el);
-    });
-  }
-
-  loadDrawer();
-  window.addEventListener("storage", loadDrawer);
-})();
-</script>
-<!-- MODULE: Local Offline Conversational AI -->
-<script>
-(function(){
-
-  const consoleBox = document.getElementById("console");
-  const input = document.getElementById("input");
-  const postBtn = document.getElementById("postBtn");
-
-  // Small local “AI brain”
-  let memory = JSON.parse(localStorage.getItem("inf_local_memory")||"[]");
-
-  function aiThink(msg){
-    memory.push(msg);
-    if(memory.length>200) memory.shift();
-    localStorage.setItem("inf_local_memory",JSON.stringify(memory));
-
-    // Simple pattern AI
-    if(msg.toLowerCase().includes("hello")) 
-      return "Hey, I'm here. What’s next?";
-    if(msg.toLowerCase().includes("music")) 
-      return "Music module ready. Want me to load the dock?";
-    if(msg.toLowerCase().includes("video")) 
-      return "Video player online. Upload through the dock.";
-    
-    // Fallback = remix memory patterns
-    let last = memory.slice(-3).join(" / ");
-    return "Thinking from memory: " + last;
-  }
-
-  function write(type,text){
-    const line=document.createElement("div");
-    line.className="console-line "+type;
-    line.textContent=text;
-    consoleBox.appendChild(line);
-    consoleBox.scrollTop=consoleBox.scrollHeight;
-  }
-
-  function send(){
-    const msg=input.value.trim();
-    if(!msg) return;
-    write("you",msg);
-    const res=aiThink(msg);
-    write("ai",res);
-    input.value="";
-  }
-
-  input.addEventListener("keydown",e=>{
-    if(e.key==="Enter") send();
-  });
-
-  postBtn.onclick = send;
-
-})();
-
-<!-- ▬▬ INFINITY PiP FLOATING VIDEO/AUDIO PLAYER ▬▬ -->
-<style>
-  #pipPlayer {
-    position: fixed;
-    bottom: 100px; 
-    right: 20px;
-    width: 300px;
-    height: 180px;
-    background: #020712ee;
-    border: 2px solid #29d9ff;
-    border-radius: 16px;
-    z-index: 999999999;
-    display: none;
-    overflow: hidden;
-    resize: both;
-  }
-
-  #pipHeader {
-    height: 38px;
-    background: linear-gradient(145deg, #29d9ff, #147a96);
-    color: #001018;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 12px;
-    font-weight: 700;
-    cursor: move;
-  }
-
-  #pipClose {
-    font-size: 20px;
-    cursor: pointer;
-  }
-
-  #pipVideo, #pipAudio {
-    width: 100%;
-    height: calc(100% - 38px);
-    background: #000;
-  }
-
-  #pipUploadBtn {
-    position: fixed;
-    bottom: 20px; right: 20px;
-    width: 70px; height: 70px;
-    border-radius: 50%;
-    background: #29d9ff;
-    border: none;
-    font-size: 36px;
-    font-weight: 900;
-    color: #001018;
-    cursor: pointer;
-    z-index: 999999999;
-    box-shadow: 0 0 25px #29d9ff;
-  }
-</style>
-
-<button id="pipUploadBtn">+</button>
-
-<div id="pipPlayer">
-  <div id="pipHeader">
-    <span>Infinity PiP</span>
-    <span id="pipClose">✕</span>
-  </div>
-
-  <video id="pipVideo" controls style="display:none;"></video>
-  <audio id="pipAudio" controls style="display:none;"></audio>
-</div>
-
-<script>
-(function(){
-
-  const pip = document.getElementById("pipPlayer");
-  const head = document.getElementById("pipHeader");
-  const close = document.getElementById("pipClose");
-  const uploadBtn = document.getElementById("pipUploadBtn");
-  const vid = document.getElementById("pipVideo");
-  const aud = document.getElementById("pipAudio");
-
-  let lib = JSON.parse(localStorage.getItem("infinity_media_lib")||"[]");
-  let current = null;
-
-  uploadBtn.onclick = ()=>{
-    let pick = document.createElement("input");
-    pick.type="file";
-    pick.accept="video/*,audio/*";
-    pick.onchange = e=>{
-      let file = e.target.files[0];
-      if(!file) return;
-
-      let rd = new FileReader();
-      rd.onload = ()=>{
-
-        // Save to Infinity Library
-        let item = {name:file.name,type:file.type,data:rd.result};
-        lib.push(item);
-        localStorage.setItem("infinity_media_lib",JSON.stringify(lib));
-
-        // Show PiP window
-        pip.style.display="block";
-
-        if(file.type.startsWith("video")){
-          vid.style.display="block";
-          aud.style.display="none";
-          vid.src = rd.result;
-          vid.play();
-        } else {
-          aud.style.display="block";
-          vid.style.display="none";
-          aud.src = rd.result;
-          aud.play();
-        }
-      };
-      rd.readAsDataURL(file);
-    };
-    pick.click();
-  };
-
-  close.onclick = ()=> pip.style.display="none";
-
-  // Drag behavior
-  let dragging=false, offX=0, offY=0;
-
-  head.addEventListener("touchstart", e=>{
-    dragging=true;
-    offX = e.touches[0].clientX - pip.offsetLeft;
-    offY = e.touches[0].clientY - pip.offsetTop;
-  });
-
-  document.addEventListener("touchend", ()=> dragging=false);
-
-  document.addEventListener("touchmove", e=>{
-    if(!dragging) return;
-    let x = e.touches[0].clientX - offX;
-    let y = e.touches[0].clientY - offY;
-    pip.style.left = x + "px";
-    pip.style.top = y + "px";
-  });
-
-})();
-</script>
-<!-- ======================= -->
-<!-- INFINITY PIP VIDEO PLAYER -->
-<!-- DROP-IN FULL COMPONENT -->
-<!-- ======================= -->
-
-<style>
-  /* PiP Player Container */
-  #pipPlayer {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 260px;
-    background: rgba(0,0,0,0.85);
-    border: 2px solid #00eaff;
-    border-radius: 14px;
-    padding: 10px;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    box-shadow: 0 0 18px #00eaff55;
-  }
-
-  #pipPlayer.pip-hidden {
-    display: none;
-  }
-
-  /* Video */
-  #pipPlayer video {
-    width: 100%;
-    border-radius: 10px;
-    background: #000;
-  }
-
-  /* Controls */
-  .pip-controls {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 6px;
-  }
-
-  .pip-controls button {
-    background: #00eaff;
-    border: none;
-    border-radius: 8px;
-    padding: 6px 10px;
-    color: #000;
-    font-weight: bold;
-    font-size: 14px;
-    cursor: pointer;
-    box-shadow: 0 0 10px #00eaff66;
-  }
-
-  .pip-controls button:active {
-    transform: scale(0.95);
-  }
-
-  /* Upload Button */
-  #pipFile {
-    position: fixed;
-    bottom: 300px;
-    right: 20px;
-    z-index: 9999;
-    background: #00eaff;
-    padding: 10px;
-    border-radius: 10px;
-    color: #000;
-    font-weight: bold;
-    border: none;
-    box-shadow: 0 0 14px #00eaffaa;
-  }
-</style>
-
-
-<!-- PiP Upload + Player -->
-<input id="pipFile" type="file" accept="video/*" />
-
-<div id="pipPlayer" class="pip-hidden">
-  <video id="pipVideo" playsinline></video>
-
-  <div class="pip-controls">
-    <button id="pipPlay">▶</button>
-    <button id="pipPause">⏸</button>
-    <button id="pipPiP">PiP</button>
-  </div>
-</div>
-
-
-<script>
-  const pipFile = document.getElementById("pipFile");
-  const pipPlayer = document.getElementById("pipPlayer");
-  const pipVideo = document.getElementById("pipVideo");
-
-  // When user selects a file
-  pipFile.addEventListener("change", () => {
-      const file = pipFile.files[0];
-      if (!file) return;
-
-      pipVideo.src = URL.createObjectURL(file);
-      pipPlayer.classList.remove("pip-hidden");
-      pipVideo.play();
-  });
-
-  // Controls
-  document.getElementById("pipPlay").onclick = () => pipVideo.play();
-  document.getElementById("pipPause").onclick = () => pipVideo.pause();
-
-  // Picture-in-Picture
-  document.getElementById("pipPiP").onclick = async () => {
-      try {
-          if (document.pictureInPictureElement) {
-              await document.exitPictureInPicture();
-          } else {
-              await pipVideo.requestPictureInPicture();
-          }
-      } catch (err) {
-          console.log("PiP Error:", err);
-      }
-  };
-</script>
-
-<!-- ======================= -->
-<!-- END FULL VIDEO COMPONENT -->
-<!-- ======================= -->
-<!-- REAL Chrome / Android Picture-in-Picture -->
-<video id="realVideo" controls playsinline style="
-    width: 100%; 
-    max-width: 500px; 
-    border-radius: 12px;
-    display: none;
-"></video>
-
-<input type="file" id="realVidUpload" accept="video/*" 
-style="
-    margin: 20px 0; 
-    padding: 10px; 
-    background:#00eaff; 
-    border-radius:10px; 
-    font-weight:bold;
-">
-
-<script>
-const rv = document.getElementById("realVideo");
-const upload = document.getElementById("realVidUpload");
-
-// Load video immediately
-upload.addEventListener("change", () => {
-    const f = upload.files[0];
-    if (!f) return;
-
-    rv.src = URL.createObjectURL(f);
-    rv.style.display = "block";
-    rv.play();
-});
-
-// Enable REAL Chrome PiP (YouTube style)
-rv.addEventListener("enterpictureinpicture", () => {
-    console.log("Entered real PiP.");
-});
-
-rv.addEventListener("leavepictureinpicture", () => {
-    console.log("Exited real PiP.");
-});
-
-// Add double-tap PiP (like TikTok)
-rv.addEventListener("dblclick", async () => {
-    try {
-        if (!document.pictureInPictureElement) {
-            await rv.requestPictureInPicture();
-        } else {
-            await document.exitPictureInPicture();
-        }
-    } catch (e) {
-        console.log("PiP error:", e);
-    }
-});
-</script>
-<!-- =============================== -->
-<!-- INFINITY FLOATING MINI-PLAYER  -->
-<!-- =============================== -->
-
-<style>
-  /* Floating Box */
-  #miniPlayer {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 220px;
-    height: 130px;
-    background: #000;
-    border: 2px solid #00eaff;
-    border-radius: 12px;
-    box-shadow: 0 0 20px #00eaff66;
-    overflow: hidden;
-    z-index: 99999;
-    display: none;
-  }
-
-  /* Video fills box */
-  #miniVideo {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    background: #000;
-  }
-
-  /* Resize handle */
-  #miniResize {
-    position: absolute;
-    width: 22px;
-    height: 22px;
-    right: 0;
-    bottom: 0;
-    background: #00eaff;
-    border-top-left-radius: 8px;
-    cursor: se-resize;
-  }
-
-  /* Upload Button */
-  #miniUpload {
-    position: fixed;
-    right: 20px;
-    bottom: 180px;
-    z-index: 99999;
-    background: #00eaff;
-    padding: 10px 12px;
-    border-radius: 8px;
-    font-weight: bold;
-    border: none;
-    box-shadow: 0 0 14px #00eaffaa;
-  }
-</style>
-
-<!-- Upload -->
-<input type="file" id="miniUpload" accept="video/*" />
-
-<!-- Player -->
 <div id="miniPlayer">
   <video id="miniVideo" autoplay controls playsinline></video>
-  <div id="miniResize"></div>
+  <div id="resizeHandle"></div>
 </div>
 
 <script>
-  const miniPlayer = document.getElementById("miniPlayer");
-  const miniVideo  = document.getElementById("miniVideo");
-  const miniUpload = document.getElementById("miniUpload");
-  const miniResize = document.getElementById("miniResize");
+// Elements
+const player = document.getElementById("miniPlayer");
+const video = document.getElementById("miniVideo");
+const upload = document.getElementById("uploadBtn");
+const resize = document.getElementById("resizeHandle");
 
-  /* Load Video */
-  miniUpload.addEventListener("change", () => {
-    let fi
+// Load video
+upload.addEventListener("change", () => {
+  let file = upload.files[0];
+  if (!file) return;
+
+  video.src = URL.createObjectURL(file);
+  player.style.display = "block";
+});
+
+/* Dragging */
+let drag = false, dx = 0, dy = 0;
+
+player.addEventListener("mousedown", e => {
+  drag = true;
+  dx = e.clientX - player.offsetLeft;
+  dy = e.clientY - player.offsetTop;
+});
+
+document.addEventListener("mousemove", e => {
+  if (!drag) return;
+  player.style.left = (e.clientX - dx) + "px";
+  player.style.top = (e.clientY - dy) + "px";
+  player.style.right = "auto";
+  player.style.bottom = "auto";
+});
+
+document.addEventListener("mouseup", () => drag = false);
+
+/* Resizing */
+let resizing = false, startW, startH, startX, startY;
+
+resize.addEventListener("mousedown", e => {
+  e.stopPropagation();
+  resizing = true;
+  startW = player.offsetWidth;
+  startH = player.offsetHeight;
+  startX = e.clientX;
+  startY = e.clientY;
+});
+
+document.addEventListener("mousemove", e => {
+  if (!resizing) return;
+  player.style.width  = startW + (e.clientX - startX) + "px";
+  player.style.height = startH + (e.clientY - startY) + "px";
+});
+
+document.addEventListener("mouseup", () => resizing = false);
+</script>
+
 </body>
 </html>
