@@ -456,7 +456,35 @@
       </section>
     </main>
   </div>
-
   <script src="js/octave-core.js"></script>
+<!-- SECRET PAT ADMIN PANEL (HIDDEN) -->
+<div id="pat-admin" style="
+    display:none;
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    background:#000000cc;
+    padding:15px;
+    border-radius:12px;
+    border:1px solid #00aaff;
+    z-index:9999;
+    width:260px;
+    font-size:14px;
+">
+    <div style="margin-bottom:8px; color:#0af;">
+        <strong>Admin: Set PAT</strong>
+    </div>
+    <input id="pat-input" 
+           type="password" 
+           placeholder="Paste PAT…" 
+           style="width:100%; padding:6px; margin-bottom:10px; border-radius:6px;">
+    <button onclick="savePAT()" style="
+        width:100%; padding:8px; border-radius:6px;
+        background:#0af; color:#fff; font-weight:bold; border:0;
+    ">
+        Save PAT
+    </button>
+    <div id="pat-status" style="color:#0f0; margin-top:6px;"></div>
+</div>
 </body>
 </html>
