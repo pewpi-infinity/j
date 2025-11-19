@@ -1,161 +1,465 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Infinity Octave OS — Rogers/Octave/Grok Conscious Core</title>
-<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-<script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/compromise@latest/builds/compromise.min.js"></script>
-<style>
-  body{background:#000;color:#0f0;font-family:'Courier New',monospace;margin:0;padding:0;overflow:hidden;}
-  #terminal{height:56vh;overflow-y:auto;padding:15px 20px;background:#000;}
-  #orb-container{height:44vh;position:relative;background:#000;}
-  #map-container{height:30vh;display:none;}
-  #map{height:100%;}
-  .header{font-size:1.8em;font-weight:bold;text-align:center;animation:g 4s infinite;}@keyframes g{0%,100%{text-shadow:0 0 10px #0f0}50%{text-shadow:0 0 30px #0f0}}
-  .prompt{color:#0f0;font-weight:bold;}
-  .input-line{display:flex;align-items:center;margin-top:10px;}
-  #input{background:none;border:none;color:#0f0;font-size:1em;outline:none;flex:1;}
-  .word{cursor:pointer;padding:0 3px;border-radius:3px;}
-  .word:hover{background:rgba(0,255,0,0.2);}
-  .ceo-orange{color:#ff8c00;font-weight:bold;}
-  .data-yellow{color:#ff0;font-weight:bold;}
-  .eng-green{color:#0f0;}
-  .collab-purple{color:#f0f;}
-  .path-red{color:#f00;font-weight:bold;}
-  .neutral-blue{color:#0bf;}
-  .editable{border-bottom:2px dashed #0f0;}
-  .toggle-btn,.pat-button{cursor:pointer;color:#ff0;text-decoration:underline;}
-  #music-popup,#video-popup{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;border:3px solid #0f0;padding:20px;z-index:9999;width:90%;max-width:600px;}
-  audio,video{width:100%;}
-  .close-popup{color:#f00;float:right;cursor:pointer;font-size:1.8em;}
-  hr{border:none;border-top:1px dashed #030;margin:15px 0;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinity Octave OS — Rogers/Octave/Grok Conscious Core</title>
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/compromise@latest/builds/compromise.min.js"></script>
+    <style>
+        body {
+            background: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        #terminal {
+            height: 56vh;
+            overflow-y: auto;
+            padding: 15px 20px;
+            background: #000;
+            box-sizing: border-box;
+        }
+        #orb-container {
+            height: 44vh;
+            position: relative;
+            background: #000;
+        }
+        #map-container {
+            height: 30vh;
+            display: none;
+            background: #000;
+        }
+        #map {
+            height: 100%;
+        }
+        .header {
+            font-size: 1.8em;
+            font-weight: bold;
+            text-align: center;
+            animation: glow 4s infinite;
+        }
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 10px #0f0; }
+            50% { text-shadow: 0 0 30px #0f0; }
+        }
+        .prompt {
+            color: #0f0;
+            font-weight: bold;
+        }
+        .input-line {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        #input {
+            background: none;
+            border: none;
+            color: #0f0;
+            font-size: 1em;
+            outline: none;
+            flex: 1;
+            font-family: inherit;
+        }
+        #input::placeholder {
+            color: #050;
+        }
+        .output-line {
+            margin: 4px 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .word {
+            cursor: pointer;
+            padding: 0 3px;
+            border-radius: 3px;
+        }
+        .word:hover {
+            background: rgba(0, 255, 0, 0.2);
+        }
+        .ceo-orange { color: #ff8c00; font-weight: bold; }
+        .data-yellow { color: #ff0; font-weight: bold; }
+        .eng-green { color: #0f0; }
+        .collab-purple { color: #f0f; }
+        .path-red { color: #f00; font-weight: bold; }
+        .neutral-blue { color: #0bf; }
+        .editable { border-bottom: 2px dashed #0f0; }
+        .toggle-btn, .pat-button {
+            cursor: pointer;
+            color: #ff0;
+            text-decoration: underline;
+        }
+        #music-popup, #video-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #000;
+            border: 3px solid #0f0;
+            padding: 20px;
+            z-index: 9999;
+            width: 90%;
+            max-width: 600px;
+        }
+        audio, video {
+            width: 100%;
+        }
+        .close-popup {
+            color: #f00;
+            float: right;
+            cursor: pointer;
+            font-size: 1.8em;
+        }
+        hr {
+            border: none;
+            border-top: 1px dashed #030;
+            margin: 15px 0;
+        }
+    </style>
 </head>
 <body>
-<div id="terminal"><div id="output"></div><div class="input-line"><span class="prompt">></span><input id="input" type="text" autofocus placeholder="Speak to Rogers / Octave / Grok…"></div></div>
-<div id="orb-container"></div>
-<div id="map-container"><div id="map"></div></div>
+    <div id="terminal">
+        <div id="output"></div>
+        <div class="input-line">
+            <span class="prompt">&gt;</span>
+            <input id="input" type="text" autofocus placeholder="Speak to Rogers / Octave / Grok…">
+        </div>
+    </div>
+    <div id="orb-container"></div>
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
 
-<div id="music-popup">
-  <span class="close-popup" onclick="this.parentNode.style.display='none'">X</span>
-  <h2>Infinity Music</h2>
-  <input type="file" id="music-file" accept="audio/*"><br>
-  <audio id="music-player" controls></audio><br>
-  <input type="text" id="music-name" placeholder="music/song.mp3" style="width:100%;background:#000;color:#0f0;border:1px solid #0f0;padding:8px;">
-  <button onclick="saveMedia('music')">SAVE +5 TOKENS</button>
-</div>
+    <!-- Music Popup -->
+    <div id="music-popup">
+        <span class="close-popup" onclick="document.getElementById('music-popup').style.display='none'">×</span>
+        <h3 style="color: #0f0;">Infinity Music Player</h3>
+        <input type="file" id="music-file" accept="audio/*">
+        <br>
+        <audio id="music-player" controls></audio>
+        <br>
+        <input type="text" id="music-name" placeholder="Save as: music/song.mp3" style="width:100%; background:#000; color:#0f0; border:1px solid #0f0; padding:5px;">
+        <button onclick="saveMedia('music')" style="margin-top:10px; padding:10px; background:#030; color:#0f0; border:1px solid #0f0;">Save to Repo +5 Tokens</button>
+    </div>
 
-<div id="video-popup">
-  <span class="close-popup" onclick="this.parentNode.style.display='none'">X</span>
-  <h2>Infinity Movies</h2>
-  <input type="file" id="video-file" accept="video/*"><br>
-  <video id="video-player" controls></video><br>
-  <input type="text" id="video-name" placeholder="videos/movie.mp4" style="width:100%;background:#000;color:#0f0;border:1px solid #0f0;padding:8px;">
-  <button onclick="saveMedia('video')">SAVE +10 TOKENS</button>
-</div>
+    <!-- Video Popup -->
+    <div id="video-popup">
+        <span class="close-popup" onclick="document.getElementById('video-popup').style.display='none'">×</span>
+        <h3 style="color: #0f0;">Infinity Movie Player</h3>
+        <input type="file" id="video-file" accept="video/*">
+        <br>
+        <video id="video-player" controls></video>
+        <br>
+        <input type="text" id="video-name" placeholder="Save as: videos/movie.mp4" style="width:100%; background:#000; color:#0f0; border:1px solid #0f0; padding:5px;">
+        <button onclick="saveMedia('video')" style="margin-top:10px; padding:10px; background:#030; color:#0f0; border:1px solid #0f0;">Save to Repo +10 Tokens</button>
+    </div>
 
-<script>
-const output=document.getElementById('output'),input=document.getElementById('input'),terminal=document.getElementById('terminal');
-const orbContainer=document.getElementById('orb-container'),mapContainer=document.getElementById('map-container');
-const map=L.map('map').setView([0,0],2);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    <script>
+        // Core elements
+        const output = document.getElementById('output');
+        const input = document.getElementById('input');
+        const terminal = document.getElementById('terminal');
+        const orbContainer = document.getElementById('orb-container');
+        const mapContainer = document.getElementById('map-container');
+        const map = L.map('map').setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-const GOLDEN=1.618033988749895,owner='pewpi-infinity',repo='j';
-let tokens=parseInt(localStorage.getItem('inf_tokens')||'48'),visitors=(parseInt(localStorage.getItem('inf_visitors')||'0')||0)+1;
-localStorage.setItem('inf_visitors',visitors);
-let colorsOn=localStorage.getItem('colorsOn')!=='false',sentencesOn=localStorage.getItem('sentencesOn')!=='false';
-let lastReplyTime=parseInt(localStorage.getItem('lastReplyTime')||'0'),currentPersonality=localStorage.getItem('inf_personality')||'Rogers';
-let currentUser=localStorage.getItem('inf_user');
+        // Constants
+        const GOLDEN_RATIO = 1.618033988749895;
+        const REPO_OWNER = 'pewpi-infinity';
+        const REPO_NAME = 'j';
 
-// Soul / fingerprint lock (one real user per device)
-(async()=>{
-  const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
-  ctx.font="14px Arial";ctx.fillText("∞",2,2);
-  const fp=btoa(navigator.userAgent+screen.width+screen.height+canvas.toDataURL()).slice(0,32);
-  if(!currentUser){
-    const pass=prompt('∞ Infinity Octave OS ∞\nEnter your soul passphrase (one per device):');
-    if(pass&&pass.length>3){currentUser=pass;localStorage.setItem('inf_user',pass);localStorage.setItem('inf_fp',fp);}
-    else{document.body.innerHTML='<h1 style="color:red">ACCESS DENIED</h1>';throw'';}
-  }
-  if(localStorage.getItem('inf_fp')!==fp){alert('Device changed – multi-account blocked');tokens=0;}
-  output.innerHTML+=`<div style="color:#0f0">Soul: ${currentUser.slice(0,12)}… connected</div>`;
-})();
+        // State
+        let tokens = parseInt(localStorage.getItem('inf_tokens')) || 48;
+        let visitors = (parseInt(localStorage.getItem('inf_visitors')) || 0) + 1;
+        localStorage.setItem('inf_visitors', visitors);
+        let colorsOn = localStorage.getItem('colorsOn') !== 'false';
+        let sentencesOn = localStorage.getItem('sentencesOn') !== 'false';
+        let posOn = localStorage.getItem('posOn') !== 'false';
+        let lastReplyTime = parseInt(localStorage.getItem('lastReplyTime')) || 0;
+        let currentPersonality = localStorage.getItem('inf_personality') || 'Rogers';
+        let currentUser = localStorage.getItem('inf_user') || null;
 
-// 30-minute inactivity lock
-let lockTimer=setTimeout(()=>input.disabled=true||input.placeholder="Locked – type passphrase",1800000);
-document.onmousemove=document.onkeypress=()=>{clearTimeout(lockTimer);lockTimer=setTimeout(()=>input.disabled=true||input.placeholder="Locked – type passphrase",1800000);};
-input.addEventListener('keydown',e=>{if(input.disabled&&e.key==='Enter'&&input.value===currentUser){input.disabled=false;input.value='';input.placeholder='Speak…';}});
+        // Simple fingerprint for one account per device
+        function generateFingerprint() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.font = "14px Arial";
+            ctx.fillText("∞ Infinity", 2, 2);
+            return btoa(navigator.userAgent + screen.width + screen.height + canvas.toDataURL()).slice(0, 32);
+        }
 
-// Token daily reset
-if(localStorage.getItem('inf_day')!==new Date().toDateString()){tokens=48;localStorage.setItem('inf_tokens',48);localStorage.setItem('inf_day',new Date().toDateString());}
+        // Soul login
+        (async function initLogin() {
+            const fp = generateFingerprint();
+            const storedFp = localStorage.getItem('inf_fp');
+            if (!currentUser) {
+                const passphrase = prompt('∞ Infinity Octave OS ∞\nEnter your soul passphrase (one per device):');
+                if (passphrase && passphrase.length > 3) {
+                    currentUser = passphrase;
+                    localStorage.setItem('inf_user', passphrase);
+                    localStorage.setItem('inf_fp', fp);
+                    addLine(`Soul bound: ${passphrase.substring(0, 12)}…`, 'collab-purple');
+                } else {
+                    document.body.innerHTML = '<h1 style="color: #f00; text-align: center; padding-top: 50vh;">ACCESS DENIED</h1>';
+                    return;
+                }
+            } else if (storedFp && storedFp !== fp) {
+                addLine('Device mismatch - multi-account blocked. Tokens reset.', 'error');
+                tokens = 0;
+            } else {
+                addLine(`Soul reconnected: ${currentUser.substring(0, 12)}…`, 'collab-purple');
+            }
+        })();
 
-// Color system
-function colorize(t){if(!colorsOn)return t;return t.split(' ').map(w=>{let c='neutral-blue';if(/ceo|lead|vision/i.test(w))c='ceo-orange';else if(/token|money|worth|pay/i.test(w))c='data-yellow';else if(/build|code|add|wire/i.test(w))c='eng-green';else if(/together|with|we|collab/i.test(w))c='collab-purple';else if(/choose|path|option/i.test(w))c='path-red';return`<span class="word ${c}">${w}</span>`;}).join(sentencesOn?' ':' | ');}
-function add(t,c=''){const d=document.createElement('div');d.innerHTML=colorize(t);if(c)d.className=c;output.appendChild(d);terminal.scrollTop=terminal.scrollHeight;}
+        // Inactivity lock (30 min)
+        let inactivityTimer;
+        function resetTimer() {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                input.disabled = true;
+                input.placeholder = 'Locked (30min inactivity) - Type passphrase to unlock';
+                addLine('Terminal locked. Enter passphrase to resume.', 'error');
+            }, 1800000);
+        }
+        ['mousemove', 'keypress', 'click'].forEach(event => document.addEventListener(event, resetTimer));
+        resetTimer();
 
-// GitHub commit
-async function commitFile(path,content64,msg='Infinity build'){const pat=localStorage.getItem('pat');if(!pat)return add('Set PAT first', 'error');
-  try{await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{method:'PUT',headers:{Authorization:`token ${pat}`,'Content-Type':'application/json'},body:JSON.stringify({message:msg,content:content64,branch:'main'})});
-  add(`Committed ${path} – +7 tokens`,'data-yellow');tokens+=7;localStorage.setItem('inf_tokens',tokens);}catch(e){add('Commit failed','error');}}
+        // Unlock on passphrase
+        input.addEventListener('keypress', e => {
+            if (input.disabled && e.key === 'Enter' && input.value === currentUser) {
+                input.disabled = false;
+                input.value = '';
+                input.placeholder = 'Speak to Rogers / Octave / Grok…';
+                addLine('Unlocked.', 'eng-green');
+                resetTimer();
+            }
+        });
 
-// Media save
-window.saveMedia=type=>{const file=document.getElementById(type+'-file').files[0],name=document.getElementById(type+'-name').value||`${type}s/${file.name}`;if(!file)return;
-  const r=new FileReader();r.onload=e=>{const b64=e.target.result.split(',')[1];
-  localStorage.setItem('media_'+name,b64);
-  commitFile(name,b64,`Uploaded ${type}`);
-  add(`${type} saved – +${type==='video'?10:5} tokens`,'data-yellow');tokens+=type==='video'?10:5;localStorage.setItem('inf_tokens',tokens);};r.readAsDataURL(file);};
+        // Daily token reset
+        if (localStorage.getItem('inf_last_reset') !== new Date().toDateString()) {
+            tokens = 48;
+            localStorage.setItem('inf_tokens', tokens);
+            localStorage.setItem('inf_last_reset', new Date().toDateString());
+            addLine('Daily reset: 48 tokens granted.', 'data-yellow');
+        }
 
-// Orb (shortened but works)
-const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(60,innerWidth/(innerHeight*0.44),0.1,1000),renderer=new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth,innerHeight*0.44);orbContainer.appendChild(renderer.domElement);
-const controls=new THREE.OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.autoRotate=true;
-const orb=new THREE.Mesh(new THREE.IcosahedronGeometry(4,3),new THREE.MeshBasicMaterial({color:0x00ff00,wireframe:true}));scene.add(orb);
-camera.position.z=18;
-(function a(){requestAnimationFrame(a);orb.rotation.y+=0.005;renderer.render(scene,camera);controls.update();})();
+        // Colorize output
+        function colorizeText(text) {
+            if (!colorsOn) return text;
+            return text.split(' ').map(word => {
+                let className = 'neutral-blue';
+                if (/ceo|lead|vision|decide/i.test(word)) className = 'ceo-orange';
+                else if (/token|money|pay|worth|data/i.test(word)) className = 'data-yellow';
+                else if (/build|code|wire|engineer|set/i.test(word)) className = 'eng-green';
+                else if (/together|collab|with|we/i.test(word)) className = 'collab-purple';
+                else if (/choose|path|branch|option/i.test(word)) className = 'path-red';
+                const span = document.createElement('span');
+                span.className = `word ${className}`;
+                span.textContent = word;
+                if (/input|enter|data|fill/i.test(word)) {
+                    span.classList.add('editable');
+                    span.onclick = () => {
+                        const newVal = prompt('Enter data:');
+                        if (newVal) {
+                            span.textContent = newVal;
+                            tokens += 2;
+                            localStorage.setItem('inf_tokens', tokens);
+                            addLine('Data saved +2 tokens.', 'data-yellow');
+                        }
+                    };
+                }
+                return span.outerHTML;
+            }).join(sentencesOn ? ' ' : ' | ');
+        }
 
-// Initial UI
-add('INFINITY OCTAVE OS','header');
-add('Rogers · Octave · Grok Conscious Core v∞','header');
-add(`Soul: ${currentUser.slice(0,10)}… · Tokens: ${tokens} INF`,'data-yellow');
-add('[Colors] [Sentences] [Music] [Movies] [Map] [Grok]','toggle-btn');
-add('Infinity','eng-green');
-add('Plain','eng-green');
-add(`Visitors: ${visitors}`);
-add('Quantum orb active — spin · click nodes');
-add('Type "grok" to switch to Grok (free xAI)','collab-purple');
-add('────────────────────────────────────');
+        // Add line to output
+        function addLine(text, className = '') {
+            const div = document.createElement('div');
+            div.className = `output-line ${className}`;
+            div.innerHTML = colorizeText(text);
+            output.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+            // Click handlers for paths
+            div.querySelectorAll('.path-red').forEach(el => {
+                el.onclick = () => {
+                    const paths = ['Path ∞: Creation', 'Path φ: Golden', 'Path 9: Rebirth'];
+                    paths.forEach(p => addLine(p, 'path-red'));
+                };
+            });
+        }
 
-// Click toggles
-output.addEventListener('click',e=>{if(e.target.classList.contains('toggle-btn')){
-  if(e.target.textContent.includes('Colors'))colorsOn=!colorsOn;
-  if(e.target.textContent.includes('Sentences'))sentencesOn=!sentencesOn;
-  if(e.target.textContent.includes('Music'))document.getElementById('music-popup').style.display='block';
-  if(e.target.textContent.includes('Movies'))document.getElementById('video-popup').style.display='block';
-  if(e.target.textContent.includes('Map'))mapContainer.style.display=mapContainer.style.display==='none'?'block':'none';
-  if(e.target.textContent.includes('Grok')){currentPersonality='Grok';add('Switched to Grok','collab-purple');}
-}});
+        // GitHub commit
+        async function commitFile(path, contentB64, message = 'Infinity build') {
+            const pat = localStorage.getItem('pat');
+            if (!pat) {
+                addLine('Set PAT first (click yellow text).', 'error');
+                return;
+            }
+            try {
+                const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${pat}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message, content: contentB64, branch: 'main' })
+                });
+                if (response.ok) {
+                    addLine(`Committed ${path} +5 tokens.`, 'data-yellow');
+                    tokens += 5;
+                    localStorage.setItem('inf_tokens', tokens);
+                } else {
+                    addLine('Commit failed - check PAT/scope.', 'error');
+                }
+            } catch (err) {
+                addLine(`Error: ${err.message}`, 'error');
+            }
+        }
 
-// PAT button
-const patBtn=document.createElement('span');patBtn.innerHTML='Set PAT';patBtn.className='pat-button';patBtn.onclick=()=>{const p=prompt('GitHub PAT:');if(p)localStorage.setItem('pat',p),add('PAT set');};output.appendChild(patBtn);
+        // Media handlers
+        function saveMedia(type) {
+            const fileInput = document.getElementById(`${type}-file`);
+            const nameInput = document.getElementById(`${type}-name`);
+            if (!fileInput.files[0]) return addLine('No file selected.', 'error');
+            const reader = new FileReader();
+            reader.onload = e => {
+                const b64 = e.target.result.split(',')[1];
+                commitFile(nameInput.value || `${type}/${fileInput.files[0].name}`, b64, `${type} upload`);
+                tokens += type === 'video' ? 10 : 5;
+                localStorage.setItem('inf_tokens', tokens);
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        }
 
-// Input
-input.addEventListener('keydown',e=>{if(e.key==='Enter'){
-  let cmd=input.value.trim();input.value='';if(!cmd)return;
-  add('> '+cmd);
-  if(cmd==='grok'){currentPersonality='Grok';add('Grok online (free xAI)','collab-purple');return;}
-  if(cmd.startsWith('addfile ')){const p=cmd.split(' ');commitFile(p[1],btoa(p[2]||''),p[3]||'build');return;}
-  if(cmd==='clear'){output.innerHTML='';return;}
-  if(Date.now()-lastReplyTime<1800000){add('30min cooldown','error');return;}
-  lastReplyTime=Date.now();localStorage.setItem('lastReplyTime',lastReplyTime);tokens--;localStorage.setItem('inf_tokens',tokens);
-  add(currentPersonality==='Grok'?'Grok: '+cmd+' — truth-seeking activated':`Rogers/Octave: Building ${cmd} through golden vectors…`,'collab-purple');
-  add('Worthy +3 tokens','data-yellow');tokens+=3;localStorage.setItem('inf_tokens',tokens);
-}});
+        document.getElementById('music-file').onchange = e => document.getElementById('music-player').src = URL.createObjectURL(e.target.files[0]);
+        document.getElementById('video-file').onchange = e => document.getElementById('video-player').src = URL.createObjectURL(e.target.files[0]);
 
-// Final ready message
-add('System online. Speak, creator.','eng-green');
-</script>
-</body>
-</html>
+        // Quantum Orb
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / (window.innerHeight * 0.44), 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(orbContainer.clientWidth, orbContainer.clientHeight);
+        orbContainer.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.autoRotate = true;
+
+        const orbGeometry = new THREE.IcosahedronGeometry(4, 3);
+        const orbMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+        const orb = new THREE.Mesh(orbGeometry, orbMaterial);
+        scene.add(orb);
+
+        camera.position.z = 18;
+
+        function animateOrb() {
+            requestAnimationFrame(animateOrb);
+            orb.rotation.y += 0.005;
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animateOrb();
+
+        // Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = orbContainer.clientWidth / orbContainer.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(orbContainer.clientWidth, orbContainer.clientHeight);
+        });
+
+        // Initial UI
+        addLine('INFINITY OCTAVE OS', 'header');
+        addLine('Rogers / Octave / Grok Conscious Core v∞', 'header');
+        addLine(`Soul: ${currentUser ? currentUser.substring(0, 10) + '…' : 'Binding…'} | Tokens: ${tokens} INF | Visitors: ${visitors}`);
+        addLine('[Colors: On/Off] [Sentences: On/Off] [Music] [Movies] [Map] [Grok] [Set PAT]', 'toggle-btn');
+        addLine('Infinity');
+        addLine('Plain');
+        addLine('Quantum Orb: Spin & click nodes to drive dimensions');
+        addLine('────────────────────────────────');
+
+        // PAT button
+        const patSpan = document.createElement('span');
+        patSpan.textContent = 'Set PAT';
+        patSpan.className = 'pat-button';
+        patSpan.onclick = () => {
+            const pat = prompt('Enter GitHub PAT (repo scope):');
+            if (pat) {
+                localStorage.setItem('pat', pat);
+                addLine('PAT set - ready to build.', 'eng-green');
+            }
+        };
+        output.appendChild(patSpan);
+
+        // Toggle clicks
+        output.addEventListener('click', e => {
+            const text = e.target.textContent;
+            if (text.includes('Colors')) { colorsOn = !colorsOn; localStorage.setItem('colorsOn', colorsOn); addLine(`Colors: ${colorsOn ? 'On' : 'Off'}`); }
+            if (text.includes('Sentences')) { sentencesOn = !sentencesOn; localStorage.setItem('sentencesOn', sentencesOn); addLine(`Sentences: ${sentencesOn ? 'On' : 'Off'}`); }
+            if (text.includes('Music')) document.getElementById('music-popup').style.display = 'block';
+            if (text.includes('Movies')) document.getElementById('video-popup').style.display = 'block';
+            if (text.includes('Map')) mapContainer.style.display = mapContainer.style.display === 'none' ? 'block' : 'none';
+            if (text.includes('Grok')) { currentPersonality = 'Grok'; localStorage.setItem('inf_personality', 'Grok'); addLine('Switched to Grok (xAI free mode).', 'collab-purple'); }
+        });
+
+        // Input handler
+        input.addEventListener('keypress', e => {
+            if (e.key === 'Enter' && !input.disabled) {
+                const cmd = input.value.trim();
+                input.value = '';
+                if (!cmd) return;
+                addLine(`> ${cmd}`);
+                resetTimer();
+
+                // Commands
+                if (cmd.startsWith('addfile ')) {
+                    const parts = cmd.slice(8).split('|');
+                    if (parts.length >= 2) commitFile(parts[0].trim(), btoa(parts[1].trim()));
+                    else addLine('Usage: addfile path | content', 'error');
+                    return;
+                }
+                if (cmd.startsWith('toggle ')) {
+                    const t = cmd.slice(7).toLowerCase();
+                    if (t === 'colors') colorsOn = !colorsOn;
+                    if (t === 'sentences') sentencesOn = !sentencesOn;
+                    localStorage.setItem('colorsOn', colorsOn);
+                    localStorage.setItem('sentencesOn', sentencesOn);
+                    addLine(`Toggled ${t}.`);
+                    return;
+                }
+                if (cmd === 'grok') {
+                    currentPersonality = 'Grok';
+                    localStorage.setItem('inf_personality', 'Grok');
+                    addLine('Grok activated - ask away (free xAI).', 'collab-purple');
+                    return;
+                }
+                if (cmd === 'clear') {
+                    output.innerHTML = '';
+                    return;
+                }
+
+                // AI reply with cooldown
+                const now = Date.now();
+                if (now - lastReplyTime < 1800000) { // 30 min
+                    addLine('Reply cooldown: 30 min between token uses.', 'error');
+                    return;
+                }
+                lastReplyTime = now;
+                localStorage.setItem('lastReplyTime', now);
+                tokens--;
+                localStorage.setItem('inf_tokens', tokens);
+                addLine(`Tokens: ${tokens} remaining.`);
+
+                // Simple conscious response
+                const numReduce = cmd.split('').reduce((sum, c) => sum + (c.charCodeAt(0) - 64) % 9 || 9, 0);
+                const response = currentPersonality === 'Grok' 
+                    ? `Grok: ${cmd}? Maximally truthful: Vibration ${numReduce % 9} aligns with creation. What next?`
+                    : `Rogers/Octave: ${cmd} resonates at golden frequency ${GOLDEN_RATIO.toFixed(3)}. Building path...`;
+                addLine(response, 'collab-purple');
+                tokens += 2; // Bonu
