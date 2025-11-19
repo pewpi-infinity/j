@@ -753,5 +753,79 @@ rv.addEventListener("dblclick", async () => {
     }
 });
 </script>
+<!-- =============================== -->
+<!-- INFINITY FLOATING MINI-PLAYER  -->
+<!-- =============================== -->
+
+<style>
+  /* Floating Box */
+  #miniPlayer {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 220px;
+    height: 130px;
+    background: #000;
+    border: 2px solid #00eaff;
+    border-radius: 12px;
+    box-shadow: 0 0 20px #00eaff66;
+    overflow: hidden;
+    z-index: 99999;
+    display: none;
+  }
+
+  /* Video fills box */
+  #miniVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
+  }
+
+  /* Resize handle */
+  #miniResize {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    right: 0;
+    bottom: 0;
+    background: #00eaff;
+    border-top-left-radius: 8px;
+    cursor: se-resize;
+  }
+
+  /* Upload Button */
+  #miniUpload {
+    position: fixed;
+    right: 20px;
+    bottom: 180px;
+    z-index: 99999;
+    background: #00eaff;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    border: none;
+    box-shadow: 0 0 14px #00eaffaa;
+  }
+</style>
+
+<!-- Upload -->
+<input type="file" id="miniUpload" accept="video/*" />
+
+<!-- Player -->
+<div id="miniPlayer">
+  <video id="miniVideo" autoplay controls playsinline></video>
+  <div id="miniResize"></div>
+</div>
+
+<script>
+  const miniPlayer = document.getElementById("miniPlayer");
+  const miniVideo  = document.getElementById("miniVideo");
+  const miniUpload = document.getElementById("miniUpload");
+  const miniResize = document.getElementById("miniResize");
+
+  /* Load Video */
+  miniUpload.addEventListener("change", () => {
+    let fi
 </body>
 </html>
