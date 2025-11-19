@@ -435,509 +435,106 @@
   postBtn.onclick = send;
 
 })();
-</script>
-<!-- MEDIA SYSTEM v2 — Audio + Video + Storage (Stable Build) -->
 
+<!-- ▬▬ INFINITY PiP FLOATING VIDEO/AUDIO PLAYER ▬▬ -->
 <style>
-  /* FONT RESET FOR THIS MODULE ONLY */
-  .media-safe, .media-safe * {
-    font-family: system-ui, sans-serif !important;
-    letter-spacing: normal !important;
-    text-transform: none !important;
-  }
-
-  #mediaMenuBtn {
-    position: fixed; top: 20px; left: 20px;
-    width: 48px; height: 48px;
-    background: #0b162ecc;
-    border: 1px solid #29d9ff;
-    color: #29d9ff;
-    border-radius: 10px;
-    font-size: 24px;
-    cursor: pointer; z-index: 9999;
-  }
-
-  #mediaDrawer {
-    position: fixed; top: 0; left: 0;
-    width: 260px; height: 100%;
-    background: #020712f8;
-    border-right: 1px solid #29d9ff50;
-    padding: 20px;
-    transform: translateX(-100%);
-    transition: 0.25s ease;
-    z-index: 9998;
-  }
-  #mediaDrawer.open { transform: translateX(0); }
-
-  #mediaDrawer h2, #mediaDrawer h3 {
-    color: #29d9ff; margin-top: 20px;
-  }
-
-  .media-file {
-    padding: 6px 0;
-    border-bottom: 1px solid #133;
-    cursor: pointer;
-    color: #d7f2ff;
-  }
-
-  /* DOCK BUTTON */
-  #dockBtn {
-    position: fixed; bottom: 25px; right: 25px;
-    width: 65px; height: 65px;
-    border-radius: 50%;
-    background: #29d9ff;
-    border: none;
-    box-shadow: 0 0 18px #29d9ff;
-    font-size: 28px;
-    color: #001019;
-    font-weight: 900;
-    cursor: pointer;
-    z-index: 9999;
-  }
-
-  /* DOCK PANEL */
-  #dockPanel {
-    position: fixed; bottom: 0; left: 0;
-    width: 100%; height: 55%;
-    background: #020712ef;
-    border-top: 1px solid #29d9ff40;
-    padding: 18px;
-    display: none;
-    z-index: 9998;
-    overflow-y: auto;
-  }
-
-  #mediaPlayer, #audioPlayer {
-    width: 100%;
-    margin-top: 14px;
-    border-radius: 10px;
-    background: #000;
-  }
-
-</style>
-
-<!-- HAMBURGER BUTTON -->
-<button id="mediaMenuBtn" class="media-safe">☰</button>
-
-<!-- STORAGE DRAWER -->
-<div id="mediaDrawer" class="media-safe">
-  <h2>Storage</h2>
-
-  <h3>Video</h3>
-  <div id="storageVideo"></div>
-
-  <h3>Audio</h3>
-  <div id="storageAudio"></div>
-
-  <h3>Other</h3>
-  <div id="storageOther"></div>
-</div>
-
-<!-- DOCK BUTTON -->
-<button id="dockBtn" class="media-safe">▶</button>
-
-<!-- MEDIA DOCK PANEL -->
-<div id="dockPanel" class="media-safe">
-  <h2 style="color:#29d9ff; margin-top:0;">Media Player</h2>
-
-  <input type="file" id="uploadMedia" accept="video/*,audio/*" />
-
-  <video id="mediaPlayer" controls></video>
-  <audio id="audioPlayer" controls></audio>
-</div>
-
-<script>
-(function(){
-
-  const menuBtn = document.getElementById("mediaMenuBtn");
-  const drawer = document.getElementById("mediaDrawer");
-
-  const dockBtn = document.getElementById("dockBtn");
-  const dock = document.getElementById("dockPanel");
-
-  const upload = document.getElementById("uploadMedia");
-  const vPlayer = document.getElementById("mediaPlayer");
-  const aPlayer = document.getElementById("audioPlayer");
-
-  const storeKey = "inf_media_store_v2";
-  let store = JSON.parse(localStorage.getItem(storeKey) || "[]");
-
-  const vidBox = document.getElementById("storageVideo");
-  const audBox = document.getElementById("storageAudio");
-  const othBox = document.getElementById("storageOther");
-
-  /* HAMBURGER TOGGLE */
-  menuBtn.onclick = () => drawer.classList.toggle("open");
-
-  /* DOCK PANEL */
-  dockBtn.onclick = () => {
-    dock.style.display = (dock.style.display==="none"||!dock.style.display) ? "block" : "none";
-  };
-
-  /* RENDER STORAGE */
-  function render(){
-    vidBox.innerHTML = "";
-    audBox.innerHTML = "";
-    othBox.innerHTML = "";
-
-    store.forEach(file=>{
-      let el=document.createElement("div");
-      el.className="media-file";
-      el.textContent=file.name;
-
-      el.onclick = ()=>{
-        if(file.type.startsWith("video")){
-          aPlayer.style.display="none";
-          vPlayer.style.display="block";
-          vPlayer.src=file.data;
-        } else if(file.type.startsWith("audio")){
-          vPlayer.style.display="none";
-          aPlayer.style.display="block";
-          aPlayer.src=file.data;
-        }
-      };
-
-      if(file.type.startsWith("video")) vidBox.appendChild(el);
-      else if(file.type.startsWith("audio")) audBox.appendChild(el);
-      else othBox.appendChild(el);
-    });
-  }
-
-  render();
-
-  /* UPLOAD HANDLER */
-  upload.onchange = e=>{
-    const file = e.target.files[0];
-    if(!file) return;
-
-    const rd = new FileReader();
-    rd.onload = ()=>{
-      const item = { name:file.name, type:file.type, data:rd.result };
-      store.push(item);
-      localStorage.setItem(storeKey, JSON.stringify(store));
-      render();
-
-      if(file.type.startsWith("video")){
-        vPlayer.style.display="block"; aPlayer.style.display="none";
-        vPlayer.src = rd.result;
-      } else if(file.type.startsWith("audio")){
-        aPlayer.style.display="block"; vPlayer.style.display="none";
-        aPlayer.src = rd.result;
-      }
-    };
-
-    rd.readAsDataURL(file);
-  };
-
-})();
-</script>
-<!-- ⬛ INFINITY MEDIA SYSTEM — MODERN, WORKING, NO CONFLICTS -->
-
-<style>
-  /* Isolate all styles in a namespace */
-  .inf-media * {
-    font-family: system-ui, sans-serif !important;
-    letter-spacing: normal !important;
-    text-transform: none !important;
-    box-sizing: border-box;
-  }
-
-  /* Floating Media Button */
-  #infMediaBtn {
-    position: fixed; bottom: 24px; right: 24px;
-    width: 70px; height: 70px;
-    border-radius: 20px;
-    border: none;
-    background: linear-gradient(145deg, #29d9ff, #147a96);
-    color: #001018;
-    font-size: 32px;
-    font-weight: 900;
-    cursor: pointer;
-    z-index: 99999;
-    box-shadow: 0 0 24px #29d9ff;
-  }
-
-  /* Player Panel */
-  #infMediaPanel {
-    position: fixed; bottom: 0; left: 0;
-    width: 100%; height: 63%;
-    background: #020712f5;
-    border-top: 2px solid #29d9ff70;
-    border-radius: 18px 18px 0 0;
-    padding: 20px;
-    display: none;
-    z-index: 99998;
-  }
-
-  #infMediaPanel h2 {
-    margin: 0; color: #29d9ff;
-    font-size: 22px;
-  }
-
-  /* Upload Area */
-  #infDropZone {
-    width: 100%;
-    height: 120px;
-    border: 2px dashed #29d9ff90;
-    border-radius: 18px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #a6d9f7;
-    margin-top: 16px;
-    cursor: pointer;
-  }
-
-  /* Video Player */
-  #infVideo {
-    width: 100%;
-    margin-top: 16px;
-    border-radius: 12px;
-    background: #000;
-    outline: 2px solid #29d9ff40;
-  }
-
-  /* Save Button */
-  #infSaveBtn {
-    margin-top: 14px;
-    padding: 12px 18px;
-    background: linear-gradient(145deg, #29d9ff, #147a96);
-    border: none; border-radius: 12px;
-    font-size: 16px; font-weight: 700;
-    cursor: pointer;
-    color: #001018;
-    width: 100%;
-  }
-
-  /* Hamburger Drawer */
-  #infDrawerBtn {
-    position: fixed; top: 20px; left: 20px;
-    width: 52px; height: 52px;
-    background: #0b162ecc;
-    border: 2px solid #29d9ff;
-    border-radius: 14px;
-    color: #29d9ff;
-    font-size: 26px;
-    cursor: pointer; z-index: 99999;
-  }
-
-  #infDrawer {
-    position: fixed; top: 0; left: 0;
-    width: 300px; height: 100%;
-    background: #020712fb;
-    border-right: 2px solid #29d9ff50;
-    transform: translateX(-100%);
-    transition: 0.25s ease;
-    padding: 20px;
-    z-index: 99998;
-  }
-
-  #infDrawer.open { transform: translateX(0); }
-  #infDrawer h3 { color: #29d9ff; margin-top: 20px; }
-  .inf-item { color:#d7f2ff; padding:6px 0; cursor:pointer; border-bottom:1px solid #133; }
-</style>
-
-<div class="inf-media">
-
-  <!-- Floating Buttons -->
-  <button id="infDrawerBtn">☰</button>
-  <button id="infMediaBtn">▶</button>
-
-  <!-- Drawer -->
-  <div id="infDrawer">
-    <h2 style="color:#29d9ff;">Media Catalog</h2>
-    <h3>Videos</h3><div id="infVidList"></div>
-    <h3>Audio</h3><div id="infAudList"></div>
-  </div>
-
-  <!-- Media Panel -->
-  <div id="infMediaPanel">
-    <h2>Media Player</h2>
-
-    <div id="infDropZone">Tap or Drop video/audio here</div>
-    <input id="infUpload" type="file" accept="video/*,audio/*" style="display:none">
-
-    <video id="infVideo" controls></video>
-    <audio id="infAudio" controls style="width:100%;display:none;"></audio>
-
-    <button id="infSaveBtn" style="display:none;">Save to Catalog</button>
-  </div>
-
-</div>
-
-<script>
-(function(){
-  const p = id => document.getElementById(id);
-
-  const panel = p("infMediaPanel");
-  const btn = p("infMediaBtn");
-  const drop = p("infDropZone");
-  const upload = p("infUpload");
-  const saveBtn = p("infSaveBtn");
-  const video = p("infVideo");
-  const audio = p("infAudio");
-  const drawerBtn = p("infDrawerBtn");
-  const drawer = p("infDrawer");
-  const listVid = p("infVidList");
-  const listAud = p("infAudList");
-
-  let store = JSON.parse(localStorage.getItem("inf_catalog")||"[]");
-  let current = null;
-
-  btn.onclick = ()=> panel.style.display = (panel.style.display==="none"||!panel.style.display)?"block":"none";
-  drawerBtn.onclick = ()=> drawer.classList.toggle("open");
-
-  function render(){
-    listVid.innerHTML=""; listAud.innerHTML="";
-    store.forEach(item=>{
-      const el=document.createElement("div");
-      el.className="inf-item"; el.textContent=item.name;
-      el.onclick=()=> loadMedia(item);
-      if(item.type.startsWith("video")) listVid.appendChild(el);
-      else listAud.appendChild(el);
-    });
-  }
-
-  function loadMedia(file){
-    current=file;
-    if(file.type.startsWith("video")){
-      video.style.display="block"; audio.style.display="none";
-      video.src=file.data;
-    } else {
-      audio.style.display="block"; video.style.display="none";
-      audio.src=file.data;
-    }
-  }
-
-  drop.onclick = ()=> upload.click();
-  drop.ondrop = e=>{
-    e.preventDefault(); readFile(e.dataTransfer.files[0]);
-  };
-  drop.ondragover = e=> e.preventDefault();
-  upload.onchange = ()=> readFile(upload.files[0]);
-
-  function readFile(file){
-    if(!file) return;
-    const rd = new FileReader();
-    rd.onload = ()=>{
-      const data = rd.result;
-      current = {name:file.name,type:file.type,data};
-      saveBtn.style.display="block";
-      loadMedia(current);
-    };
-    rd.readAsDataURL(file);
-  }
-
-  saveBtn.onclick = ()=>{
-    store.push(current);
-    localStorage.setItem("inf_catalog",JSON.stringify(store));
-    render();
-    saveBtn.style.display="none";
-  };
-
-  render();
-
-})();
-</script>
-<!-- ▬▬▬ INFINITY FLOATING MEDIA VIEWER ▬▬▬ -->
-<style>
-  #infFloatPlayer {
+  #pipPlayer {
     position: fixed;
-    bottom: 20px;
+    bottom: 100px; 
     right: 20px;
-    width: 320px;
-    height: 200px;
-    background: #020712f0;
+    width: 300px;
+    height: 180px;
+    background: #020712ee;
     border: 2px solid #29d9ff;
-    border-radius: 14px;
-    z-index: 999999;
+    border-radius: 16px;
+    z-index: 999999999;
     display: none;
-    resize: both;
     overflow: hidden;
+    resize: both;
   }
 
-  #infFloatHeader {
-    width: 100%;
-    height: 36px;
+  #pipHeader {
+    height: 38px;
     background: linear-gradient(145deg, #29d9ff, #147a96);
-    cursor: move;
     color: #001018;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 12px;
     font-weight: 700;
+    cursor: move;
   }
 
-  #infCloseFP {
-    cursor:pointer;
+  #pipClose {
     font-size: 20px;
+    cursor: pointer;
   }
 
-  #infVideoFP, #infAudioFP {
+  #pipVideo, #pipAudio {
     width: 100%;
-    height: calc(100% - 36px);
+    height: calc(100% - 38px);
     background: #000;
   }
 
-  #infUploadFP {
+  #pipUploadBtn {
     position: fixed;
-    bottom: 20px;
-    right: 350px;
-    width: 64px;
-    height: 64px;
+    bottom: 20px; right: 20px;
+    width: 70px; height: 70px;
     border-radius: 50%;
-    border:none;
     background: #29d9ff;
-    color:#001018;
-    font-size:28px;
-    font-weight:900;
-    cursor:pointer;
-    z-index:999999;
-    box-shadow:0 0 18px #29d9ff;
+    border: none;
+    font-size: 36px;
+    font-weight: 900;
+    color: #001018;
+    cursor: pointer;
+    z-index: 999999999;
+    box-shadow: 0 0 25px #29d9ff;
   }
 </style>
 
-<button id="infUploadFP">+</button>
+<button id="pipUploadBtn">+</button>
 
-<div id="infFloatPlayer">
-  <div id="infFloatHeader">
-    <span>Infinity Player</span>
-    <span id="infCloseFP">✕</span>
+<div id="pipPlayer">
+  <div id="pipHeader">
+    <span>Infinity PiP</span>
+    <span id="pipClose">✕</span>
   </div>
-  <video id="infVideoFP" controls style="display:none;"></video>
-  <audio id="infAudioFP" controls style="display:none;"></audio>
+
+  <video id="pipVideo" controls style="display:none;"></video>
+  <audio id="pipAudio" controls style="display:none;"></audio>
 </div>
 
 <script>
 (function(){
-  const fp = document.getElementById("infFloatPlayer");
-  const hdr = document.getElementById("infFloatHeader");
-  const close = document.getElementById("infCloseFP");
-  const uploadBtn = document.getElementById("infUploadFP");
-  const vid = document.getElementById("infVideoFP");
-  const aud = document.getElementById("infAudioFP");
 
-  let store = JSON.parse(localStorage.getItem("inf_library")||"[]");
+  const pip = document.getElementById("pipPlayer");
+  const head = document.getElementById("pipHeader");
+  const close = document.getElementById("pipClose");
+  const uploadBtn = document.getElementById("pipUploadBtn");
+  const vid = document.getElementById("pipVideo");
+  const aud = document.getElementById("pipAudio");
+
+  let lib = JSON.parse(localStorage.getItem("infinity_media_lib")||"[]");
+  let current = null;
 
   uploadBtn.onclick = ()=>{
-    let uploader = document.createElement("input");
-    uploader.type="file";
-    uploader.accept="video/*,audio/*";
-    uploader.onchange = e=>{
+    let pick = document.createElement("input");
+    pick.type="file";
+    pick.accept="video/*,audio/*";
+    pick.onchange = e=>{
       let file = e.target.files[0];
       if(!file) return;
 
-      let rd=new FileReader();
+      let rd = new FileReader();
       rd.onload = ()=>{
-        
-        // Save to Infinity Library
-        let item = {name:file.name, type:file.type, data:rd.result};
-        store.push(item);
-        localStorage.setItem("inf_library",JSON.stringify(store));
 
-        // Load into player
-        fp.style.display="block";
+        // Save to Infinity Library
+        let item = {name:file.name,type:file.type,data:rd.result};
+        lib.push(item);
+        localStorage.setItem("infinity_media_lib",JSON.stringify(lib));
+
+        // Show PiP window
+        pip.style.display="block";
 
         if(file.type.startsWith("video")){
           vid.style.display="block";
@@ -945,67 +542,39 @@
           vid.src = rd.result;
           vid.play();
         } else {
-          vid.style.display="none";
           aud.style.display="block";
+          vid.style.display="none";
           aud.src = rd.result;
           aud.play();
         }
       };
       rd.readAsDataURL(file);
     };
-    uploader.click();
+    pick.click();
   };
 
-  close.onclick = ()=> fp.style.display="none";
+  close.onclick = ()=> pip.style.display="none";
 
-  // Make window draggable
-  let offsetX, offsetY, dragging=false;
+  // Drag behavior
+  let dragging=false, offX=0, offY=0;
 
-  hdr.addEventListener("mousedown",e=>{
+  head.addEventListener("touchstart", e=>{
     dragging=true;
-    offsetX=e.clientX - fp.offsetLeft;
-    offsetY=e.clientY - fp.offsetTop;
+    offX = e.touches[0].clientX - pip.offsetLeft;
+    offY = e.touches[0].clientY - pip.offsetTop;
   });
 
-  document.addEventListener("mouseup",()=> dragging=false);
+  document.addEventListener("touchend", ()=> dragging=false);
 
-  document.addEventListener("mousemove",e=>{
+  document.addEventListener("touchmove", e=>{
     if(!dragging) return;
-    fp.style.left = (e.clientX - offsetX)+"px";
-    fp.style.top = (e.clientY - offsetY)+"px";
+    let x = e.touches[0].clientX - offX;
+    let y = e.touches[0].clientY - offY;
+    pip.style.left = x + "px";
+    pip.style.top = y + "px";
   });
 
 })();
 </script>
-<script>
-  // REMOVE OLD MEDIA PANEL IF PRESENT
-  const oldPanel = document.querySelector("div[ id='dockPanel'], div[id='mediaDockPanel'], div[id='mediaPlayer'], section.terminal-card + div");
-  if (oldPanel) oldPanel.remove();
-
-  const oldUploader = document.querySelector("input[id='uploadMedia'], input[id='mediaUpload']");
-  if (oldUploader) oldUploader.remove();
-</script>
-<style>
-  /* FORCE MEDIA SYSTEM TO FLOAT ABOVE EVERYTHING */
-  #infFloatPlayer,
-  #infUploadFP,
-  #infDrawer,
-  #infDrawerBtn {
-    position: fixed !important;
-    z-index: 999999999 !important;
-  }
-
-  /* Fix Infinity OS fullscreen container blocking layers */
-  body, html {
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-  }
-
-  /* If Infinity uses a root wrapper, unlock it: */
-  .shell, .terminal-card, main, #app, #root {
-    overflow: visible !important;
-    position: relative !important;
-  }
-</style>
 </body>
 </html>
