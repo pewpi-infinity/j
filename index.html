@@ -234,5 +234,86 @@
     })();
   </script>
 <script src="module_media_dock.js"></script>
+<!-- MODULE: Video Player Dock -->
+<style>
+  #mediaDockBtn {
+    position: fixed; bottom: 22px; right: 22px;
+    background: #29d9ff; color: #001018;
+    border-radius: 50%; width: 58px; height: 58px;
+    border: none; font-size: 26px; font-weight: 900;
+    cursor: pointer; z-index: 999;
+    box-shadow: 0 0 18px #29d9ff;
+  }
+
+  #mediaDockPanel {
+    position: fixed; bottom: 0; left: 0;
+    width: 100%; height: 60%;
+    background: #020712ef;
+    border-top: 1px solid #29d9ff80;
+    display: none; padding: 18px;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.8);
+    z-index: 998; overflow-y: auto;
+  }
+
+  #mediaList div {
+    padding: 8px 0; cursor: pointer;
+    color: #a7c0e0; border-bottom: 1px solid #133;
+  }
+</style>
+
+<button id="mediaDockBtn">▶</button>
+
+<div id="mediaDockPanel">
+  <h2 style="margin-top:0;">Media Player</h2>
+
+  <input type="file" id="mediaUpload" accept="video/*,audio/*" />
+
+  <video id="mediaPlayer" controls style="width:100%; margin-top:14px;"></video>
+
+  <h3>Stored Files</h3>
+  <div id="mediaList"></div>
+</div>
+
+<script>
+(function(){
+  const dockBtn = document.getElementById("mediaDockBtn");
+  const panel = document.getElementById("mediaDockPanel");
+  const upload = document.getElementById("mediaUpload");
+  const player = document.getElementById("mediaPlayer");
+  const list = document.getElementById("mediaList");
+
+  let store = JSON.parse(localStorage.getItem("inf_media_store")||"[]");
+
+  function renderList(){
+    list.innerHTML="";
+    store.forEach((item,i)=>{
+      const el=document.createElement("div");
+      el.textContent=item.name;
+      el.onclick=()=>{ player.src=item.data; };
+      list.appendChild(el);
+    });
+  }
+
+  dockBtn.onclick = ()=>{ 
+    panel.style.display = (panel.style.display==="none"||!panel.style.display)
+      ? "block" : "none"; 
+  };
+
+  upload.onchange = e=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const rd = new FileReader();
+    rd.onload = ()=>{
+      store.push({ name:file.name, data: rd.result });
+      localStorage.setItem("inf_media_store", JSON.stringify(store));
+      renderList();
+      player.src = rd.result;
+    };
+    rd.readAsDataURL(file);
+  };
+
+  renderList();
+})();
+</script>
 </body>
 </html>
