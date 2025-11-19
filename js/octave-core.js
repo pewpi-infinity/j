@@ -283,3 +283,73 @@
     TokenEngine.init();
   });
 })();
+/* === C5: SELF-EXPANDING SCRIPT ENGINE ======================= */
+
+if (!window.OctaveScriptSpace) {
+    window.OctaveScriptSpace = [];
+}
+
+let ChapterSize = 50;
+let ChapterLog = [];
+let ChapterNumber = 1;
+
+function writeToScriptSpace(mode, text) {
+    const entry = {
+        ts: Date.now(),
+        mode: mode,
+        text: text
+    };
+
+    ChapterLog.push(entry);
+    OctaveScriptSpace.push(entry);
+
+    // Auto-chaptering for infinite memory without slowdown
+    if (ChapterLog.length >= ChapterSize) {
+        OctaveScriptSpace.push({
+            chapter: ChapterNumber,
+            summary: `Completed chapter ${ChapterNumber} (${ChapterSize} entries)`
+        });
+
+        ChapterLog = [];
+        ChapterNumber++;
+
+        Wallet.awardTaskTokens(1, "memory chapter written");
+    }
+}
+
+// Hook conversational posts
+function logUser(text) {
+    writeToScriptSpace("user", text);
+}
+
+function logAI(text) {
+    writeToScriptSpace("ai", text);
+}
+
+// Retrieve engine
+function retrieveMemory(filter = {}) {
+    return OctaveScriptSpace.filter(entry => {
+        if (filter.mode && entry.mode !== filter.mode) return false;
+        if (filter.keyword && !entry.text?.includes(filter.keyword)) return false;
+        if (filter.after && entry.ts < filter.after) return false;
+        return true;
+    });
+}
+
+// Save/restore (local only, per your design)
+function saveMemory() {
+    localStorage.setItem("octave_memory", JSON.stringify(OctaveScriptSpace));
+}
+
+function loadMemory() {
+    let stored = localStorage.getItem("octave_memory");
+    if (stored) {
+        OctaveScriptSpace = JSON.parse(stored);
+    }
+}
+
+window.addEventListener("beforeunload", saveMemory);
+window.addEventListener("load", loadMemory);
+
+/* === END C5 ================================================= */
+
