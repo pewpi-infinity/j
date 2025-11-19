@@ -977,5 +977,13 @@
 
 })();
 </script>
+<script>
+  // REMOVE OLD MEDIA PANEL IF PRESENT
+  const oldPanel = document.querySelector("div[ id='dockPanel'], div[id='mediaDockPanel'], div[id='mediaPlayer'], section.terminal-card + div");
+  if (oldPanel) oldPanel.remove();
+
+  const oldUploader = document.querySelector("input[id='uploadMedia'], input[id='mediaUpload']");
+  if (oldUploader) oldUploader.remove();
+</script>
 </body>
 </html>
