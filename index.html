@@ -245,6 +245,40 @@
 <script src="module_microapps_buttons.js"></script>
 <script src="module_3d_engine.js"></script>
 <script src="module_pay_advertise.js"></script>
+<script>
+/* ============================
+   ADMIN PANEL TRIGGER (WORKS 100%)
+============================ */
 
+function showAdminPanel() {
+  const p = document.getElementById("pat-admin");
+  if (!p) return;
+  p.style.display = "block";
+  console.log("Admin panel opened.");
+}
+
+// METHOD 1 — triple-tap upper-right corner
+let tapCount = 0;
+document.body.addEventListener("touchend", (e) => {
+  const x = e.changedTouches[0].clientX;
+  const y = e.changedTouches[0].clientY;
+
+  // activate only if tapped in top-right 100px zone
+  if (x > window.innerWidth - 120 && y < 120) {
+    tapCount++;
+    if (tapCount >= 3) {
+      showAdminPanel();
+      tapCount = 0;
+    }
+    setTimeout(() => tapCount = 0, 800);
+  }
+});
+
+// METHOD 2 — typing "admin" into the console
+document.getElementById("postBtn").addEventListener("click", () => {
+  const val = document.getElementById("input").value.trim().toLowerCase();
+  if (val === "admin") showAdminPanel();
+});
+</script>
 </body>
 </html>
