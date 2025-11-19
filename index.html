@@ -390,6 +390,29 @@ document.getElementById("postBtn").addEventListener("click", () => {
   const val = document.getElementById("input").value.trim().toLowerCase();
   if (val === "admin") showAdminPanel();
 });
+.app-window {
+  position: fixed;
+  top: 120px;
+  left: 40px;
+  width: 280px;
+  height: 180px;
+  background: rgba(0,10,25,0.92);
+  border: 1px solid #29d9ff;
+  border-radius: 14px;
+  padding: 10px;
+  z-index: 100;
+  box-shadow: 0 0 18px rgba(41,217,255,0.35);
+  display: none;
+}
+
+.app-window-header {
+  font-size: 14px;
+  color: #7ffaff;
+  cursor: move;
+  margin-bottom: 8px;
+  user-select: none;
+}
+
 </script>
 </body>
 </html>
