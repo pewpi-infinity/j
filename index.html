@@ -382,5 +382,59 @@
   window.addEventListener("storage", loadDrawer);
 })();
 </script>
+<!-- MODULE: Local Offline Conversational AI -->
+<script>
+(function(){
+
+  const consoleBox = document.getElementById("console");
+  const input = document.getElementById("input");
+  const postBtn = document.getElementById("postBtn");
+
+  // Small local “AI brain”
+  let memory = JSON.parse(localStorage.getItem("inf_local_memory")||"[]");
+
+  function aiThink(msg){
+    memory.push(msg);
+    if(memory.length>200) memory.shift();
+    localStorage.setItem("inf_local_memory",JSON.stringify(memory));
+
+    // Simple pattern AI
+    if(msg.toLowerCase().includes("hello")) 
+      return "Hey, I'm here. What’s next?";
+    if(msg.toLowerCase().includes("music")) 
+      return "Music module ready. Want me to load the dock?";
+    if(msg.toLowerCase().includes("video")) 
+      return "Video player online. Upload through the dock.";
+    
+    // Fallback = remix memory patterns
+    let last = memory.slice(-3).join(" / ");
+    return "Thinking from memory: " + last;
+  }
+
+  function write(type,text){
+    const line=document.createElement("div");
+    line.className="console-line "+type;
+    line.textContent=text;
+    consoleBox.appendChild(line);
+    consoleBox.scrollTop=consoleBox.scrollHeight;
+  }
+
+  function send(){
+    const msg=input.value.trim();
+    if(!msg) return;
+    write("you",msg);
+    const res=aiThink(msg);
+    write("ai",res);
+    input.value="";
+  }
+
+  input.addEventListener("keydown",e=>{
+    if(e.key==="Enter") send();
+  });
+
+  postBtn.onclick = send;
+
+})();
+</script>
 </body>
 </html>
