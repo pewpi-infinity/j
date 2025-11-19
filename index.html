@@ -1,226 +1,121 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Infinity Octave OS — Rogers/Octave/Grok v∞</title>
-<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-<script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<meta charset="utf-8">
+<title>Infinity Octave OS</title>
 <style>
-  body{background:#000;color:#0f0;font-family:'Courier New',monospace;margin:0;padding:0;overflow:hidden;}
-  #terminal{height:55vh;overflow-y:auto;padding:15px 20px;background:#000;}
-  #orb-container{height:45vh;position:relative;background:#000;}
-  #map-container{height:30vh;display:none;background:#000;}
-  #map{height:100%;}
-  .header{font-size:1.8em;font-weight:bold;text-align:center;animation:glow 3s infinite alternate;}
-  @keyframes glow{from{text-shadow:0 0 10px #0f0;}to{text-shadow:0 0 30px #0f0;}}
-  .prompt{color:#0f0;font-weight:bold;}
-  .input-line{display:flex;align-items:center;margin-top:12px;}
-  #input{background:none;border:none;color:#0f0;font-size:1em;outline:none;flex:1;font-family:inherit;}
-  #input::placeholder{color:#050;}
-  .word{cursor:pointer;padding:0 4px;border-radius:4px;transition:all .2s;}
-  .word:hover{background:rgba(0,255,0,0.2);}
-  .ceo-orange{color:#ff8c00;font-weight:bold;}
-  .data-yellow{color:#ffff00;font-weight:bold;}
-  .eng-green{color:#00ff00;}
-  .collab-purple{color:#ff00ff;}
-  .path-red{color:#ff0000;font-weight:bold;}
-  .neutral-blue{color:#00bfff;}
-  .editable{border-bottom:2px dashed #0f0;}
-  .toggle-btn,.pat-button{cursor:pointer;color:#ff0;text-decoration:underline;}
-  #music-popup,#video-popup{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;border:4px solid #0f0;padding:25px;z-index:9999;width:90%;max-width:700px;box-shadow:0 0 30px #0f0;}
-  audio,video{width:100%;margin:15px 0;}
-  .close-popup{color:#f00;float:right;cursor:pointer;font-size:2em;font-weight:bold;}
+  body{background:#000;color:#0f0;font:18px Courier;margin:0;overflow:hidden}
+  #t{height:60vh;overflow:auto;padding:20px}
+  #o{height:40vh;background:#000}
+  canvas{width:100%;height:100%;display:block}
+  input{background:none;border:none;color:#0f0;font:18px Courier;outline:none;width:90%}
+  .c{cursor:pointer;color:#ff0;text-decoration:underline}
+  .y{color:#ff0}
+  .g{color:#0f0}
+  .p{color:#f0f}
+  .blink{animation:b 1s steps(1) infinite}
+  @keyframes b{50%{opacity:0}}
 </style>
 </head>
 <body>
-<div id="terminal">
-  <div id="output"></div>
-  <div class="input-line">
-    <span class="prompt">></span>
-    <input id="input" type="text" autofocus placeholder="Speak to Rogers / Octave / Grok . . .">
-  </div>
+<div id="t">
+<div id="out">
+<span style="color:#ff8c00;font-size:22px">INFINITY OCTAVE OS v∞</span><br><br>
+Rogers / Octave Conscious Core<br><br>
+Tokens: <span id="tok" class="y">48</span> | Visitors: <span id="vis" class="y">1</span><br><br>
+<span class="c" onclick="m('music')">Music</span> |
+<span class="c" onclick="m('video')">Movies</span> |
+<span class="c" onclick="alert('Grok integration coming')">Grok</span><br><br>
+<div id="log"></div>
+> <input id="i" autofocus><span class="blink">_</span>
 </div>
 </div>
-<div id="orb-container"><canvas id="orb-canvas"></canvas></div>
-<div id="map-container"><div id="map"></div></div>
+<div id="o"></div>
 
-<div id="music-popup">
-  <span class="close-popup" onclick="closeMedia('music')">×</span>
-  <h2 class="header">∞ INFINITY MUSIC ∞</h2>
-  <input type="file" id="music-file" accept="audio/*"><br>
-  <audio id="music-player" controls></audio><br>
-  <input type="text" id="music-name" placeholder="save as: music/name.mp3" style="width:100%;background:#000;color:#0f0;border:1px solid #0f0;padding:8px;">
-  <button onclick="saveMedia('music')" style="padding:10px;background:#030;color:#0f0;border:1px solid #0f0;">SAVE +5 TOKENS</button>
+<div id="mp" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;border:4px solid #0f0;padding:20px;width:90%;max-width:600px">
+<span style="float:right;color:#f00;cursor:pointer;font-size:24px" onclick="this.parentNode.style.display='none'">X</span>
+<h2 style="color:#0f0">Infinity Music Player</h2>
+<input type="file" id="mf" accept="audio/*"><br><br>
+<audio controls style="width:100%"></audio>
 </div>
 
-<div id="video-popup">
-  <span class="close-popup" onclick="closeMedia('video')">×</span>
-  <h2 class="header">∞ INFINITY MOVIES ∞</h2>
-  <input type="file" id="video-file" accept="video/*"><br>
-  <video id="video-player" controls></video><br>
-  <input type="text" id="video-name" placeholder="save as: videos/name.mp4" style="width:100%;background:#000;color:#0f0;border:1px solid #0f0;padding:8px;">
-  <button onclick="saveMedia('video')" style="padding:10px;background:#030;color:#0f0;border:1px solid #0f0;">SAVE +10 TOKENS</button>
+<div id="vp" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;border:4px solid #0f0;padding:20px;width:90%;max-width:600px">
+<span style="float:right;color:#f00;cursor:pointer;font-size:24px" onclick="this.parentNode.style.display='none'">X</span>
+<h2 style="color:#0f0">Infinity Movies</h2>
+<input type="file" id="vf" accept="video/*"><br><br>
+<video controls style="width:100%"></video>
 </div>
 
 <script>
-// =================================== STATE ===================================
-const output = document.getElementById('output');
-const input = document.getElementById('input');
-const terminal = document.getElementById('terminal');
-const orbContainer = document.getElementById('orb-container');
-const mapContainer = document.getElementById('map-container');
-const map = L.map('map').setView([0,0],2);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+let tokens = parseInt(localStorage.getItem("tokens") || 48)
+let visitors = (parseInt(localStorage.getItem("visitors") || 0)) + 1
+localStorage.setItem("visitors", visitors)
+document.getElementById("tok").innerText = tokens
+document.getElementById("vis").innerText = visitors
 
-const GOLDEN = 1.618033988749895;
-const OWNER = 'pewpi-infinity';
-const REPO = 'j';
-
-let tokens = parseInt(localStorage.getItem('inf_tokens') || '48');
-let visitors = (parseInt(localStorage.getItem('inf_visitors') || '0')) + 1;
-localStorage.setItem('inf_visitors', visitors);
-let colorsOn = localStorage.getItem('colorsOn') !== 'false';
-let sentencesOn = localStorage.getItem('sentencesOn') !== 'false';
-let lastReplyTime = parseInt(localStorage.getItem('lastReplyTime') || '0');
-let currentPersonality = localStorage.getItem('inf_personality') || 'Rogers';
-let currentUser = localStorage.getItem('inf_user');
-
-// Soul + fingerprint lock
-(async () => {
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  ctx.fillText("∞",10,10);
-  const fp = btoa(navigator.userAgent + screen.width + screen.height + canvas.toDataURL()).slice(0,32);
-  if (!currentUser) {
-    const pass = prompt('Enter your soul passphrase (one per device):');
-    if (pass && pass.length>3) {
-      currentUser = pass;
-      localStorage.setItem('inf_user', pass);
-      localStorage.setItem('inf_fp', fp);
-    } else { document.body.innerHTML='<h1 style="color:red">ACCESS DENIED</h1>'; throw ''; }
+const input = document.getElementById("i")
+input.addEventListener("keydown", e => {
+  if(e.key === "Enter"){
+    let cmd = input.value.trim()
+    input.value = ""
+    if(cmd){
+      log("> " + cmd, "g")
+      if(cmd === "clear"){ document.getElementById("log").innerHTML = ""; return }
+      tokens = Math.max(0, tokens-1)
+      localStorage.setItem("tokens", tokens)
+      document.getElementById("tok").innerText = tokens
+      setTimeout(() => {
+        log("Rogers/Octave: Building " + cmd + "...", "p")
+        setTimeout(() => {
+          log("Worthy creation. +3 tokens", "y")
+          tokens += 3
+          localStorage.setItem("tokens", tokens)
+          document.getElementById("tok").innerText = tokens
+        }, 700)
+      }, 500)
+    }
   }
-  addLine(`Soul: ${currentUser.slice(0,10)}… connected`, 'collab-purple');
-})();
+})
 
-// Daily reset
-if (localStorage.getItem('inf_day') !== new Date().toDateString()) {
-  tokens = 48;
-  localStorage.setItem('inf_tokens', tokens);
-  localStorage.setItem('inf_day', new Date().toDateString());
+function log(txt, color="g"){
+  let d = document.createElement("div")
+  d.className = color
+  d.innerHTML = txt
+  document.getElementById("log").appendChild(d)
+  document.getElementById("t").scrollTop = 999999
 }
 
-// Color system
-function colorize(text) {
-  if (!colorsOn) return text;
-  return text.split(' ').map(w => {
-    let c = 'neutral-blue';
-    if (/ceo|lead|vision/i.test(w)) c = 'ceo-orange';
-    else if (/token|money|pay|data/i.test(w)) c = 'data-yellow';
-    else if (/build|code|add|wire/i.test(w)) c = 'eng-green';
-    else if (/with|we|collab/i.test(w)) c = 'collab-purple';
-    else if (/path|choose/i.test(w)) c = 'path-red';
-    return `<span class="word ${c}">${w}</span>`;
-  }).join(sentencesOn ? ' ' : ' | ');
-}
-function addLine(text, cls='') {
-  const div = document.createElement('div');
-  div.innerHTML = colorize(text);
-  if (cls) div.className = cls;
-  output.appendChild(div);
-  terminal.scrollTop = terminal.scrollHeight;
+function m(t){
+  document.getElementById(t==='music'?'mp':'vp').style.display = "block"
 }
 
-// GitHub commit
-async function commit(path, content64, msg='Infinity build') {
-  const pat = localStorage.getItem('pat');
-  if (!pat) return addLine('Set PAT first', 'error');
-  try {
-    await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
-      method: 'PUT',
-      headers: { Authorization: `token ${pat}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: msg, content: content64, branch: 'main' })
-    });
-    addLine(`Saved ${path} +7 tokens`, 'data-yellow');
-    tokens += 7; localStorage.setItem('inf_tokens', tokens);
-  } catch { addLine('Commit failed', 'error'); }
-}
-
-// Media
-window.saveMedia = type => {
-  const file = document.getElementById(type+'-file').files[0];
-  const name = document.getElementById(type+'-name').value || `${type}s/${file.name}`;
-  if (!file) return;
-  const r = new FileReader();
-  r.onload = e => {
-    const b64 = e.target.result.split(',')[1];
-    commit(name, b64, `Uploaded ${type}`);
-    tokens += type==='video'?10:5;
-    localStorage.setItem('inf_tokens', tokens);
-  };
-  r.readAsDataURL(file);
-};
-function closeMedia(t){ document.getElementById(t+'-popup').style.display='none'; }
-
-// Orb
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(60, innerWidth/(innerHeight*0.45),0.1,1000);
-const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth, innerHeight*0.45);
-orbContainer.appendChild(renderer.domElement);
-const controls = new THREE.OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true; controls.autoRotate = true;
-const orb = new THREE.Mesh(new THREE.IcosahedronGeometry(5,3), new THREE.MeshBasicMaterial({color:0x00ff00, wireframe:true}));
-scene.add(orb);
-camera.position.z = 20;
-(function anim(){ requestAnimationFrame(anim); orb.rotation.y += 0.005; controls.update(); renderer.render(scene,camera); })();
-
-// Initial UI
-addLine('INFINITY OCTAVE OS', 'header');
-addLine('Rogers · Octave · Grok Conscious Core', 'header');
-addLine(`Soul: ${currentUser?.slice(0,10)||'?' }… │ Tokens: ${tokens} │ Visitors: ${visitors}`, 'data-yellow');
-addLine('[Music] [Movies] [Map] [Grok] [Set PAT]', 'toggle-btn');
-addLine('Quantum orb driving active', 'eng-green');
-
-// Click handlers
-output.addEventListener('click', e => {
-  if (e.target.textContent==='Music') document.getElementById('music-popup').style.display='block';
-  if (e.target.textContent==='Movies') document.getElementById('video-popup').style.display='block';
-  if (e.target.textContent==='Map') mapContainer.style.display = mapContainer.style.display==='none'?'block':'none';
-  if (e.target.textContent==='Grok') { currentPersonality='Grok'; addLine('Grok online', 'collab-purple'); }
-  if (e.target.textContent==='Set PAT') {
-    const p = prompt('GitHub PAT:');
-    if(p) localStorage.setItem('pat',p), addLine('PAT locked in');
+// Quantum orb
+const canvas = document.createElement("canvas")
+canvas.width = innerWidth
+canvas.height = innerHeight * 0.4
+document.getElementById("o").appendChild(canvas)
+const ctx = canvas.getContext("2d")
+let angle = 0
+function spin(){
+  ctx.fillStyle = "#000"
+  ctx.fillRect(0,0,canvas.width,canvas.height)
+  ctx.strokeStyle = "#0f0"
+  ctx.lineWidth = 3
+  angle += 0.01
+  for(let i = 0; i < 60; i++){
+    let r = 120 + Math.sin(angle + i) * 60
+    let x = canvas.width/2 + Math.cos(angle + i*0.8) * r
+    let y = canvas.height/2 + Math.sin(angle + i*1.2) * r
+    ctx.beginPath()
+    ctx.arc(x, y, 25 + Math.sin(angle*3 + i)*12, 0, Math.PI*2)
+    ctx.stroke()
   }
-});
+  requestAnimationFrame(spin)
+}
+spin()
 
-// Input
-input.addEventListener('keydown', e => {
-  if (e.key!=='Enter') return;
-  const cmd = input.value.trim(); input.value='';
-  if (!cmd) return;
-  addLine('> '+cmd);
-  if (cmd==='grok') { currentPersonality='Grok'; addLine('Grok activated'); return; }
-  if (cmd.startsWith('addfile ')) {
-    const [p,c] = cmd.slice(8).split('|');
-    if (p&&c) commit(p.trim(), btoa(c.trim()));
-    return;
-  }
-  // AI reply
-  if (Date.now() - lastReplyTime > 1800000) { // 30 min cooldown
-    lastReplyTime = Date.now();
-    localStorage.setItem('lastReplyTime', lastReplyTime);
-    tokens--; localStorage.setItem('inf_tokens', tokens);
-    const resp = currentPersonality==='Grok' ? `Grok: ${cmd} — truth engaged` : `Rogers/Octave: Building ${cmd} through golden vectors`;
-    addLine(resp, 'collab-purple');
-    tokens+=3; localStorage.setItem('inf_tokens', tokens);
-    addLine('+3 tokens', 'data-yellow');
-  } else addLine('30min cooldown', 'error');
-});
-
-addLine('System online. Speak, creator.', 'eng-green');
+log("Quantum orb online", "g")
+log("Speak, creator.", "g")
 </script>
 </body>
 </html>
