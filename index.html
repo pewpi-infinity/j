@@ -4,44 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Infinity Octave OS — Terminal v1</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/compromise@latest/builds/compromise.min.js"></script> <!-- For POS tagging -->
     <style>
-        body {
-            background: #000;
-            color: #0f0;
-            font-family: 'Courier New', monospace;
-            margin: 0;
-            padding: 20px;
-            overflow: hidden;
-        }
-        #terminal {
-            height: 100vh;
-            overflow-y: auto;
-            padding-bottom: 10px;
-        }
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
+        #terminal { height: 70vh; overflow-y: auto; padding-bottom: 10px; }
+        #map-container { height: 30vh; display: none; margin-top: 10px; } /* Toggleable */
+        #map { height: 100%; }
         .header { font-size: 1.2em; font-weight: bold; }
         .subheader { font-size: 1em; }
         .status { color: #aaa; font-size: 0.9em; }
         .prompt { color: #0f0; margin-right: 5px; }
-        .input-line {
-            display: flex;
-            align-items: center;
-            margin-top: 10px;
-        }
-        #input {
-            background: none;
-            border: none;
-            color: #0f0;
-            font-family: inherit;
-            font-size: 1em;
-            outline: none;
-            flex: 1;
-        }
+        .input-line { display: flex; align-items: center; margin-top: 10px; }
+        #input { background: none; border: none; color: #0f0; font-family: inherit; font-size: 1em; outline: none; flex: 1; }
         #input::placeholder { color: #555; }
         .output-line { margin: 5px 0; white-space: pre-wrap; }
         .error { color: #f00; }
-        .pat-button { cursor: pointer; color: #ff0; text-decoration: underline; }
-        .pat-button:hover { color: #fff; }
+        .pat-button, .toggle-btn { cursor: pointer; color: #ff0; text-decoration: underline; }
+        .toggle-btn:hover { color: #fff; }
         hr { border: none; border-top: 1px solid #333; margin: 20px 0; }
+        /* Colors for words */
+        .word { cursor: pointer; padding: 0 2px; border-radius: 2px; transition: background 0.2s; }
+        .word:hover { background: rgba(255,255,255,0.1); }
+        .ceo-orange { color: #ffa500; } /* CEO */
+        .data-yellow { color: #ffff00; } /* Data/money */
+        .eng-green { color: #00ff00; } /* Engineer/settings */
+        .collab-purple { color: #800080; } /* AI collab */
+        .path-red { color: #ff0000; } /* Choose path */
+        .neutral-blue { color: #00bfff; } /* Default */
+        .noun { background: rgba(0,255,0,0.2); }
+        .verb { background: rgba(255,0,0,0.2); }
+        .adverb { background: rgba(0,0,255,0.2); }
+        /* Editable input */
+        .editable { border-bottom: 1px solid #0f0; cursor: text; }
+        .editable:focus { outline: none; background: rgba(0,255,0,0.1); }
+        /* Music popup */
+        #music-popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #000; border: 2px solid #0f0; padding: 20px; z-index: 1000; }
+        #music-popup audio { width: 100%; margin: 10px 0; }
+        .close-popup { color: #f00; cursor: pointer; float: right; }
     </style>
 </head>
 <body>
@@ -52,34 +53,105 @@
             <input id="input" type="text" autofocus placeholder="Type a command...">
         </div>
     </div>
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
+    <div id="music-popup">
+        <span class="close-popup" onclick="closeMusic()">&times;</span>
+        <h3>Music Player</h3>
+        <input type="file" id="music-file" accept="audio/*">
+        <audio id="music-player" controls></audio>
+        <button onclick="addMusicToRepo()">Save to Infinity</button>
+    </div>
 
     <script>
         const output = document.getElementById('output');
         const input = document.getElementById('input');
         const terminal = document.getElementById('terminal');
-        const owner = 'pewpi-infinity';
-        const repo = 'j';
+        const mapContainer = document.getElementById('map-container');
+        const map = L.map('map').setView([51.505, -0.09], 13); // Default London
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        const owner = 'pewpi-infinity'; const repo = 'j';
 
-        // Persisted state
+        // State
         let tokens = parseInt(localStorage.getItem('tokens')) || 48;
         let visitors = parseInt(localStorage.getItem('visitors') || '0') + 1;
         let mode = localStorage.getItem('mode') || 'Conversate';
+        let colorsOn = localStorage.getItem('colorsOn') !== 'false';
+        let sentencesOn = localStorage.getItem('sentencesOn') !== 'false';
+        let posOn = localStorage.getItem('posOn') !== 'false';
+        let lastReplyTime = parseInt(localStorage.getItem('lastReplyTime')) || 0;
         localStorage.setItem('visitors', visitors);
 
-        // Helper: Add line to output and scroll
+        // Modules
+        function colorizeOutput(text) {
+            // Simple contextual coloring - expand with rules
+            const words = text.split(' ');
+            return words.map(word => {
+                let colorClass = 'neutral-blue';
+                if (word.includes('CEO') || word.includes('decide')) colorClass = 'ceo-orange';
+                else if (word.includes('data') || word.includes('token') || word.includes('money')) colorClass = 'data-yellow';
+                else if (word.includes('set') || word.includes('build') || word.includes('engineer')) colorClass = 'eng-green';
+                else if (word.includes('together') || word.includes('collab')) colorClass = 'collab-purple';
+                else if (word.includes('choose') || word.includes('path')) colorClass = 'path-red';
+                return colorsOn ? `<span class="word ${colorClass}">${word}</span>` : word;
+            }).join(sentencesOn ? ' ' : ' | '); // False sentences: pipe-separated
+        }
+
+        function tagPOS(text) {
+            if (!posOn) return text;
+            const doc = nlp(text); // compromise.js
+            let tagged = text;
+            doc.nouns().tag('noun').terms().forEach(t => t.text({ backgroundColor: 'rgba(0,255,0,0.2)' }));
+            doc.verbs().tag('verb').terms().forEach(t => t.text({ backgroundColor: 'rgba(255,0,0,0.2)' }));
+            doc.adverbs().tag('adverb').terms().forEach(t => t.text({ backgroundColor: 'rgba(0,0,255,0.2)' }));
+            return doc.out('html'); // Returns tagged HTML
+        }
+
+        function handleClickPath(el) {
+            if (el.classList.contains('path-red')) {
+                const options = ['Path A: Direct build', 'Path B: Collaborate first', 'Path C: Data dive'];
+                const choice = prompt('Choose path:\n' + options.join('\n'));
+                if (choice) addLine(`Selected: ${choice} - Routing to module...`);
+            } else if (el.classList.contains('editable')) {
+                const newVal = prompt('Edit input:', el.textContent);
+                if (newVal !== null) {
+                    el.textContent = newVal;
+                    // "Pay" via tokens? Or save to location (e.g., repo)
+                    localStorage.setItem('input-' + el.dataset.location, newVal);
+                    addLine('Saved to Infinity location. +1 token for input!', 'data-yellow');
+                    tokens = Math.min(48, tokens + 1);
+                }
+            }
+        }
+
         function addLine(text, className = '') {
             const div = document.createElement('div');
             div.className = `output-line ${className}`;
-            div.textContent = text;
+            let colored = colorizeOutput(text);
+            let tagged = tagPOS(colored);
+            div.innerHTML = tagged;
+            // Make words clickable
+            div.querySelectorAll('.word').forEach(wordEl => {
+                wordEl.addEventListener('click', () => handleClickPath(wordEl));
+                if (text.includes('Enter') || text.includes('input')) wordEl.classList.add('editable');
+            });
             output.appendChild(div);
             terminal.scrollTop = terminal.scrollHeight;
+            // Map markers for visitors (fake for now)
+            if (visitors > 1) {
+                const lat = 51.5 + Math.random() * 10 - 5; // Random
+                const lng = -0.1 + Math.random() * 10 - 5;
+                L.marker([lat, lng]).addTo(map).bindPopup(`Visitor ${visitors}`);
+            }
         }
 
-        // Display initial UI
+        // Initial UI (your original)
         addLine('INFINITY OCTAVE OS', 'header');
         addLine('Infinity Octave OS — Terminal v1', 'subheader');
         addLine(`Mode: ${mode}`, 'status');
         addLine(`Tokens: ${tokens} INF / day ≤ 48`, 'status');
+        addLine(`[Colors: ${colorsOn ? 'On' : 'Off'}] [Sentences: ${sentencesOn ? 'On' : 'Off'}] [POS: ${posOn ? 'On' : 'Off'}] [Music] [Map]`, 'status toggle-btn' /* Clickable toggles */);
         addLine('');
         addLine('Infinity');
         addLine('Plain');
@@ -89,109 +161,112 @@
         patButton.innerHTML = 'Admin: Set PAT';
         patButton.className = 'pat-button';
         patButton.onclick = () => {
-            const pat = prompt('Enter GitHub Personal Access Token:');
-            if (pat) {
-                localStorage.setItem('pat', pat);
-                addLine('PAT set successfully.');
-            } else {
-                addLine('PAT not set.', 'error');
-            }
+            const pat = prompt('Enter GitHub PAT:');
+            if (pat) { localStorage.setItem('pat', pat); addLine('PAT set successfully.'); }
         };
         output.appendChild(patButton);
         addLine('');
         const divider = document.createElement('hr');
         output.appendChild(divider);
 
-        // GitHub API: Add file
-        async function createFile(path, content, message) {
-            const pat = localStorage.getItem('pat');
-            if (!pat) {
-                addLine('Error: Set PAT first via Admin button.', 'error');
-                return;
-            }
-            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
-            const body = {
-                message: message || 'Added via Infinity Terminal',
-                content: btoa(unescape(encodeURIComponent(content))) // Base64 encode
-            };
-            try {
-                const res = await fetch(url, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${pat}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(body)
-                });
-                if (res.ok) {
-                    addLine(`✅ File added/updated: ${path}`);
-                } else {
-                    const err = await res.json();
-                    addLine(`❌ GitHub API error: ${err.message}`, 'error');
-                }
-            } catch (err) {
-                addLine(`❌ Network error: ${err.message}`, 'error');
-            }
-        }
-
-        // Process input
-        function processInput(cmd) {
-            if (!cmd.trim()) return;
-            addLine(`> ${cmd}`);
-            tokens = Math.max(0, tokens - 1);
-            localStorage.setItem('tokens', tokens);
-            addLine(`Tokens remaining: ${tokens}`);
-
-            if (cmd === 'setmode build') {
-                mode = 'Build';
-                localStorage.setItem('mode', mode);
-                addLine(`Mode switched to: ${mode}`);
-            } else if (mode === 'Conversate') {
-                // Placeholder AI response (integrate real AI API here, e.g., xAI: https://x.ai/api)
-                setTimeout(() => {
-                    const responses = [
-                        'Interesting... Tell me more.',
-                        'That sounds like a plan. What next?',
-                        'Processing... Done. Tokens deducted.',
-                        'Autonomous build mode activated subtly.'
-                    ];
-                    const response = responses[Math.floor(Math.random() * responses.length)];
-                    addLine(`AI: ${response}`);
-                }, 500);
-            } else if (cmd.startsWith('addfile ')) {
-                // Format: addfile <path> | <content> | <message>
-                const parts = cmd.substring(8).split('|').map(p => p.trim());
-                if (parts.length >= 2) {
-                    const path = parts[0];
-                    const content = parts[1];
-                    const message = parts[2] || 'Terminal build';
-                    createFile(path, content, message);
-                } else {
-                    addLine('Usage: addfile path | content | message', 'error');
-                }
-            } else {
-                addLine(`Unknown command in ${mode} mode. Try "addfile" to build.`);
-            }
-        }
-
-        // Input handler
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const cmd = input.value;
-                processInput(cmd);
-                input.value = '';
-                if (tokens === 0) addLine('⚠️ Out of tokens. Reset tomorrow or set more.', 'error');
+        // Toggle clicks
+        output.addEventListener('click', (e) => {
+            if (e.target.classList.contains('toggle-btn')) {
+                const txt = e.target.textContent;
+                if (txt.includes('Colors')) { colorsOn = !colorsOn; localStorage.setItem('colorsOn', colorsOn); addLine(`Colors: ${colorsOn ? 'On' : 'Off'}`); }
+                else if (txt.includes('Sentences')) { sentencesOn = !sentencesOn; localStorage.setItem('sentencesOn', sentencesOn); addLine(`Sentences: ${sentencesOn ? 'On' : 'Off'}`); }
+                else if (txt.includes('POS')) { posOn = !posOn; localStorage.setItem('posOn', posOn); addLine(`POS: ${posOn ? 'On' : 'Off'}`); }
+                else if (txt.includes('Music')) { document.getElementById('music-popup').style.display = 'block'; }
+                else if (txt.includes('Map')) { mapContainer.style.display = mapContainer.style.display === 'none' ? 'block' : 'none'; if (navigator.geolocation) navigator.geolocation.getCurrentPosition(pos => { map.setView([pos.coords.latitude, pos.coords.longitude], 13); L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(map).bindPopup('You'); }); }
             }
         });
 
-        // Daily token reset simulation (check last reset)
-        const lastReset = localStorage.getItem('lastReset') || new Date().toDateString();
-        if (lastReset !== new Date().toDateString()) {
-            tokens = 48;
-            localStorage.setItem('tokens', tokens);
-            localStorage.setItem('lastReset', new Date().toDateString());
-            addLine('Tokens reset for new day!');
+        function closeMusic() { document.getElementById('music-popup').style.display = 'none'; }
+
+        async function createFile(path, content, message) {
+            // Same as before...
+            const pat = localStorage.getItem('pat');
+            if (!pat) { addLine('Error: Set PAT first.', 'error'); return; }
+            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+            const body = { message: message || 'Added via Infinity', content: btoa(unescape(encodeURIComponent(content))) };
+            try {
+                const res = await fetch(url, { method: 'PUT', headers: { 'Authorization': `token ${pat}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                if (res.ok) {
+                    addLine(`✅ File added: ${path}. Worthy build! +3 tokens`, 'data-yellow');
+                    tokens = Math.min(48, tokens + 3); // Bonus
+                } else { const err = await res.json(); addLine(`❌ Error: ${err.message}`, 'error'); }
+            } catch (err) { addLine(`❌ Network: ${err.message}`, 'error'); }
         }
+
+        function processInput(cmd) {
+            if (!cmd.trim()) return;
+            addLine(`> ${cmd}`);
+            const now = Date.now();
+            if (now - lastReplyTime < 30 * 60 * 1000) { addLine('Cooldown: Wait 30min for next reply.', 'error'); return; } // 30min
+            if (tokens <= 0) { addLine('Out of tokens. Earn via builds!', 'error'); return; }
+            tokens--; localStorage.setItem('tokens', tokens);
+            lastReplyTime = now; localStorage.setItem('lastReplyTime', now);
+            addLine(`Tokens remaining: ${tokens} (Reply cooldown reset)`);
+
+            if (cmd.startsWith('toggle ')) {
+                // Handled in click, but cmd fallback
+                addLine('Use status toggles for colors/sentences/POS.');
+            } else if (cmd === 'setmode build') {
+                mode = 'Build'; localStorage.setItem('mode', mode); addLine(`Mode: ${mode}`, 'eng-green');
+            } else if (mode === 'Conversate') {
+                setTimeout(() => {
+                    const responses = [
+                        'Rogers here: <span class="editable" data-location="user-input">Enter your vision</span> to build together. Processing...',
+                        'Octave OS: That <span class="path-red">path</span> leads to infinity—choose wisely or collab <span class="collab-purple">with me</span>.',
+                        'AI: Data flow looks golden. Tokens for worthy input? <span class="data-yellow">Yes, +2</span>.',
+                        'Engineer mode: Set <span class="eng-green">settings</span> now?'
+                    ];
+                    const response = responses[Math.floor(Math.random() * responses.length)];
+                    addLine(`AI (Rogers/Octave): ${response}`);
+                }, 500);
+            } else if (cmd.startsWith('addfile ')) {
+                const parts = cmd.substring(8).split('|').map(p => p.trim());
+                if (parts.length >= 2) createFile(parts[0], parts[1], parts[2]);
+                else addLine('Usage: addfile path | content | message', 'error');
+            } else {
+                addLine(`Unknown in ${mode}. Try toggle or addfile for builds.`);
+            }
+            // Daily reset
+            if (new Date().toDateString() !== localStorage.getItem('lastReset')) {
+                tokens = 48; localStorage.setItem('tokens', tokens); localStorage.setItem('lastReset', new Date().toDateString());
+                addLine('Daily tokens reset!');
+            }
+        }
+
+        // Music handlers
+        document.getElementById('music-file').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) document.getElementById('music-player').src = URL.createObjectURL(file);
+        });
+        async function addMusicToRepo() {
+            const audio = document.getElementById('music-player');
+            if (audio.src) {
+                const response = await fetch(audio.src);
+                const blob = await response.blob();
+                const reader = new FileReader();
+                reader.onload = () => createFile('music/track.mp3', reader.result.split(',')[1], 'Added music');
+                reader.readAsDataURL(blob);
+            }
+        }
+
+        // Input
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                processInput(input.value);
+                input.value = '';
+            }
+        });
+
+        // Init map with consent
+        if (navigator.geolocation) navigator.geolocation.getCurrentPosition(pos => {
+            map.setView([pos.coords.latitude, pos.coords.longitude], 13);
+            L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(map).bindPopup('Your location');
+        });
     </script>
 </body>
 </html>
