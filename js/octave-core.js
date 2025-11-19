@@ -1,3 +1,55 @@
+/* === INFINITY ONE-ACCOUNT DEVICE/IP LOCK ===================== */
+
+// Create anonymous device fingerprint
+async function createDeviceHash() {
+    const data = [
+        navigator.userAgent,
+        navigator.platform,
+        screen.width + "x" + screen.height,
+        Intl.DateTimeFormat().resolvedOptions().timeZone
+    ].join("|");
+
+    const encoded = new TextEncoder().encode(data);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", encoded);
+    return Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
+}
+
+async function enforceInfinityLock() {
+    const newID = await createDeviceHash();
+    const storedID = localStorage.getItem("InfinityDeviceID");
+
+    // First-time setup
+    if (!storedID) {
+        localStorage.setItem("InfinityDeviceID", newID);
+        return;
+    }
+
+    // Device mismatch — BLOCK
+    if (storedID !== newID) {
+        alert("This device already has an Infinity account.\nOne account per device.");
+        throw new Error("Infinity OS Account Lock Triggered");
+    }
+
+    // Rate limit: prevent rapid multi-account creation
+    const lastCreation = Number(localStorage.getItem("InfinityAccountCreatedAt")) || 0;
+    const now = Date.now();
+
+    // If new creation attempts too fast → block
+    if (now - lastCreation < 1000 * 60 * 30) {  // 30 minutes
+        alert("Account creation blocked.\nToo many attempts from this network.");
+        throw new Error("Infinity OS Rate-Lock Triggered");
+    }
+
+    // Update timestamp
+    localStorage.setItem("InfinityAccountCreatedAt", now.toString());
+}
+
+enforceInfinityLock();
+
+/* ============================================================= */
+
 // js/octave-core.js
 
 (function () {
