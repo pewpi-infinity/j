@@ -576,5 +576,129 @@
 
 })();
 </script>
+<!-- ======================= -->
+<!-- INFINITY PIP VIDEO PLAYER -->
+<!-- DROP-IN FULL COMPONENT -->
+<!-- ======================= -->
+
+<style>
+  /* PiP Player Container */
+  #pipPlayer {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 260px;
+    background: rgba(0,0,0,0.85);
+    border: 2px solid #00eaff;
+    border-radius: 14px;
+    padding: 10px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 0 18px #00eaff55;
+  }
+
+  #pipPlayer.pip-hidden {
+    display: none;
+  }
+
+  /* Video */
+  #pipPlayer video {
+    width: 100%;
+    border-radius: 10px;
+    background: #000;
+  }
+
+  /* Controls */
+  .pip-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+  }
+
+  .pip-controls button {
+    background: #00eaff;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    color: #000;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00eaff66;
+  }
+
+  .pip-controls button:active {
+    transform: scale(0.95);
+  }
+
+  /* Upload Button */
+  #pipFile {
+    position: fixed;
+    bottom: 300px;
+    right: 20px;
+    z-index: 9999;
+    background: #00eaff;
+    padding: 10px;
+    border-radius: 10px;
+    color: #000;
+    font-weight: bold;
+    border: none;
+    box-shadow: 0 0 14px #00eaffaa;
+  }
+</style>
+
+
+<!-- PiP Upload + Player -->
+<input id="pipFile" type="file" accept="video/*" />
+
+<div id="pipPlayer" class="pip-hidden">
+  <video id="pipVideo" playsinline></video>
+
+  <div class="pip-controls">
+    <button id="pipPlay">▶</button>
+    <button id="pipPause">⏸</button>
+    <button id="pipPiP">PiP</button>
+  </div>
+</div>
+
+
+<script>
+  const pipFile = document.getElementById("pipFile");
+  const pipPlayer = document.getElementById("pipPlayer");
+  const pipVideo = document.getElementById("pipVideo");
+
+  // When user selects a file
+  pipFile.addEventListener("change", () => {
+      const file = pipFile.files[0];
+      if (!file) return;
+
+      pipVideo.src = URL.createObjectURL(file);
+      pipPlayer.classList.remove("pip-hidden");
+      pipVideo.play();
+  });
+
+  // Controls
+  document.getElementById("pipPlay").onclick = () => pipVideo.play();
+  document.getElementById("pipPause").onclick = () => pipVideo.pause();
+
+  // Picture-in-Picture
+  document.getElementById("pipPiP").onclick = async () => {
+      try {
+          if (document.pictureInPictureElement) {
+              await document.exitPictureInPicture();
+          } else {
+              await pipVideo.requestPictureInPicture();
+          }
+      } catch (err) {
+          console.log("PiP Error:", err);
+      }
+  };
+</script>
+
+<!-- ======================= -->
+<!-- END FULL VIDEO COMPONENT -->
+<!-- ======================= -->
 </body>
 </html>
