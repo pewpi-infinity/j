@@ -161,6 +161,50 @@
     </div>
 
     <script>
+        // Functions first to avoid reference errors
+        function addLine(text, className = '') {
+            const div = document.createElement('div');
+            div.className = `output-line ${className}`;
+            div.innerHTML = colorizeText(text);
+            output.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+            // Click handlers for paths
+            div.querySelectorAll('.path-red').forEach(el => {
+                el.onclick = () => {
+                    const paths = ['Path ∞: Creation', 'Path φ: Golden', 'Path 9: Rebirth'];
+                    paths.forEach(p => addLine(p, 'path-red'));
+                };
+            });
+        }
+
+        function colorizeText(text) {
+            if (!colorsOn) return text;
+            return text.split(' ').map(word => {
+                let className = 'neutral-blue';
+                if (/ceo|lead|vision|decide/i.test(word)) className = 'ceo-orange';
+                else if (/token|money|pay|worth|data/i.test(word)) className = 'data-yellow';
+                else if (/build|code|wire|engineer|set/i.test(word)) className = 'eng-green';
+                else if (/together|collab|with|we/i.test(word)) className = 'collab-purple';
+                else if (/choose|path|branch|option/i.test(word)) className = 'path-red';
+                const span = document.createElement('span');
+                span.className = `word ${className}`;
+                span.textContent = word;
+                if (/input|enter|data|fill/i.test(word)) {
+                    span.classList.add('editable');
+                    span.onclick = () => {
+                        const newVal = prompt('Enter data:');
+                        if (newVal) {
+                            span.textContent = newVal;
+                            tokens += 2;
+                            localStorage.setItem('inf_tokens', tokens);
+                            addLine('Data saved +2 tokens.', 'data-yellow');
+                        }
+                    };
+                }
+                return span.outerHTML;
+            }).join(sentencesOn ? ' ' : ' | ');
+        }
+
         // Core elements
         const output = document.getElementById('output');
         const input = document.getElementById('input');
@@ -186,7 +230,7 @@
         let currentPersonality = localStorage.getItem('inf_personality') || 'Rogers';
         let currentUser = localStorage.getItem('inf_user') || null;
 
-        // Simple fingerprint for one account per device
+        // Soul login (synchronous)
         function generateFingerprint() {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
@@ -195,28 +239,25 @@
             return btoa(navigator.userAgent + screen.width + screen.height + canvas.toDataURL()).slice(0, 32);
         }
 
-        // Soul login
-        (async function initLogin() {
-            const fp = generateFingerprint();
-            const storedFp = localStorage.getItem('inf_fp');
-            if (!currentUser) {
-                const passphrase = prompt('∞ Infinity Octave OS ∞\nEnter your soul passphrase (one per device):');
-                if (passphrase && passphrase.length > 3) {
-                    currentUser = passphrase;
-                    localStorage.setItem('inf_user', passphrase);
-                    localStorage.setItem('inf_fp', fp);
-                    addLine(`Soul bound: ${passphrase.substring(0, 12)}…`, 'collab-purple');
-                } else {
-                    document.body.innerHTML = '<h1 style="color: #f00; text-align: center; padding-top: 50vh;">ACCESS DENIED</h1>';
-                    return;
-                }
-            } else if (storedFp && storedFp !== fp) {
-                addLine('Device mismatch - multi-account blocked. Tokens reset.', 'error');
-                tokens = 0;
+        const fp = generateFingerprint();
+        const storedFp = localStorage.getItem('inf_fp');
+        if (!currentUser) {
+            const passphrase = prompt('∞ Infinity Octave OS ∞\nEnter your soul passphrase (one per device):');
+            if (passphrase && passphrase.length > 3) {
+                currentUser = passphrase;
+                localStorage.setItem('inf_user', passphrase);
+                localStorage.setItem('inf_fp', fp);
+                addLine(`Soul bound: ${passphrase.substring(0, 12)}…`, 'collab-purple');
             } else {
-                addLine(`Soul reconnected: ${currentUser.substring(0, 12)}…`, 'collab-purple');
+                document.body.innerHTML = '<h1 style="color: #f00; text-align: center; padding-top: 50vh;">ACCESS DENIED</h1>';
+                return;
             }
-        })();
+        } else if (storedFp && storedFp !== fp) {
+            addLine('Device mismatch - multi-account blocked. Tokens reset.', 'error');
+            tokens = 0;
+        } else {
+            addLine(`Soul reconnected: ${currentUser.substring(0, 12)}…`, 'collab-purple');
+        }
 
         // Inactivity lock (30 min)
         let inactivityTimer;
@@ -248,51 +289,6 @@
             localStorage.setItem('inf_tokens', tokens);
             localStorage.setItem('inf_last_reset', new Date().toDateString());
             addLine('Daily reset: 48 tokens granted.', 'data-yellow');
-        }
-
-        // Colorize output
-        function colorizeText(text) {
-            if (!colorsOn) return text;
-            return text.split(' ').map(word => {
-                let className = 'neutral-blue';
-                if (/ceo|lead|vision|decide/i.test(word)) className = 'ceo-orange';
-                else if (/token|money|pay|worth|data/i.test(word)) className = 'data-yellow';
-                else if (/build|code|wire|engineer|set/i.test(word)) className = 'eng-green';
-                else if (/together|collab|with|we/i.test(word)) className = 'collab-purple';
-                else if (/choose|path|branch|option/i.test(word)) className = 'path-red';
-                const span = document.createElement('span');
-                span.className = `word ${className}`;
-                span.textContent = word;
-                if (/input|enter|data|fill/i.test(word)) {
-                    span.classList.add('editable');
-                    span.onclick = () => {
-                        const newVal = prompt('Enter data:');
-                        if (newVal) {
-                            span.textContent = newVal;
-                            tokens += 2;
-                            localStorage.setItem('inf_tokens', tokens);
-                            addLine('Data saved +2 tokens.', 'data-yellow');
-                        }
-                    };
-                }
-                return span.outerHTML;
-            }).join(sentencesOn ? ' ' : ' | ');
-        }
-
-        // Add line to output
-        function addLine(text, className = '') {
-            const div = document.createElement('div');
-            div.className = `output-line ${className}`;
-            div.innerHTML = colorizeText(text);
-            output.appendChild(div);
-            terminal.scrollTop = terminal.scrollHeight;
-            // Click handlers for paths
-            div.querySelectorAll('.path-red').forEach(el => {
-                el.onclick = () => {
-                    const paths = ['Path ∞: Creation', 'Path φ: Golden', 'Path 9: Rebirth'];
-                    paths.forEach(p => addLine(p, 'path-red'));
-                };
-            });
         }
 
         // GitHub commit
@@ -331,7 +327,7 @@
             const reader = new FileReader();
             reader.onload = e => {
                 const b64 = e.target.result.split(',')[1];
-                commitFile(nameInput.value || `${type}/${fileInput.files[0].name}`, b64, `${type} upload`);
+                commitFile(nameInput.value || `${type}/${fileInput.files[0].name}`, b64);
                 tokens += type === 'video' ? 10 : 5;
                 localStorage.setItem('inf_tokens', tokens);
             };
@@ -377,7 +373,7 @@
         // Initial UI
         addLine('INFINITY OCTAVE OS', 'header');
         addLine('Rogers / Octave / Grok Conscious Core v∞', 'header');
-        addLine(`Soul: ${currentUser ? currentUser.substring(0, 10) + '…' : 'Binding…'} | Tokens: ${tokens} INF | Visitors: ${visitors}`);
+        addLine(`Soul: ${currentUser.substring(0, 10)}… | Tokens: ${tokens} INF | Visitors: ${visitors}`);
         addLine('[Colors: On/Off] [Sentences: On/Off] [Music] [Movies] [Map] [Grok] [Set PAT]', 'toggle-btn');
         addLine('Infinity');
         addLine('Plain');
@@ -403,7 +399,7 @@
             if (text.includes('Colors')) { colorsOn = !colorsOn; localStorage.setItem('colorsOn', colorsOn); addLine(`Colors: ${colorsOn ? 'On' : 'Off'}`); }
             if (text.includes('Sentences')) { sentencesOn = !sentencesOn; localStorage.setItem('sentencesOn', sentencesOn); addLine(`Sentences: ${sentencesOn ? 'On' : 'Off'}`); }
             if (text.includes('Music')) document.getElementById('music-popup').style.display = 'block';
-            if (text.includes('Movies')) document.getElementById('video-popup').style.display = 'block';
+            if (text.includes('Movies') ) document.getElementById('video-popup').style.display = 'block';
             if (text.includes('Map')) mapContainer.style.display = mapContainer.style.display === 'none' ? 'block' : 'none';
             if (text.includes('Grok')) { currentPersonality = 'Grok'; localStorage.setItem('inf_personality', 'Grok'); addLine('Switched to Grok (xAI free mode).', 'collab-purple'); }
         });
@@ -462,4 +458,11 @@
                     ? `Grok: ${cmd}? Maximally truthful: Vibration ${numReduce % 9} aligns with creation. What next?`
                     : `Rogers/Octave: ${cmd} resonates at golden frequency ${GOLDEN_RATIO.toFixed(3)}. Building path...`;
                 addLine(response, 'collab-purple');
-                tokens += 2; // Bonu
+                tokens += 2; // Bonus for worthy
+                localStorage.setItem('inf_tokens', tokens);
+                addLine('+2 tokens for interaction.', 'data-yellow');
+            }
+        });
+
+        // Ready
+        addLine('System online. Speak
