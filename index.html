@@ -1,667 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Infinity Octave OS — Rogers/Octave Conscious Core v∞</title>
-    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-    <script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/compromise@latest/builds/compromise.min.js"></script>
-    <style>
-        body{background:#000;color:#0f0;font-family:'Courier New',monospace;margin:0;padding:0;overflow:hidden;}
-        #terminal{height:55vh;overflow-y:auto;padding:15px 20px;background:#000;position:relative;}
-        #orb-container{height:45vh;position:relative;background:#000;}
-        #map-container{height:30vh;display:none;background:#000;}
-        #map{height:100%;}
-        .header{font-size:1.8em;font-weight:bold;text-align:center;animation:glow 3s infinite alternate;}
-        @keyframes glow{from{text-shadow:0 0 10px #0f0;}to{text-shadow:0 0 20px #0f0,0 0 30px #0f0;}}
-        .subheader{font-size:1.2em;text-align:center;margin:10px 0;}
-        .status{color:#0b0;font-size:0.9em;}
-        .prompt{color:#0f0;font-weight:bold;}
-        .input-line{display:flex;align-items:center;margin-top:12px;}
-        #input{background:none;border:none;color:#0f0;font-family:inherit;font-size:1em;outline:none;flex:1;}
-        #input::placeholder{color:#050;}
-        .output-line{margin:4px 0;white-space:pre-wrap;word-break:break-word;}
-        .word{cursor:pointer;padding:0 4px;border-radius:4px;transition:all .2s;}
-        .word:hover{background:rgba(0,255,0,0.2);}
-        .ceo-orange{color:#ff8c00;font-weight:bold;}
-        .data-yellow{color:#ffff00;font-weight:bold;}
-        .eng-green{color:#00ff00;}
-        .collab-purple{color:#ff00ff;}
-        .path-red{color:#ff0000;font-weight:bold;}
-        .neutral-blue{color:#00bfff;}
-        .editable{border-bottom:2px dashed #0f0;}
-        .toggle-btn,.pat-button,.media-btn{cursor:pointer;color:#ff0;text-decoration:underline;}
-        .toggle-btn:hover,.pat-button:hover,.media-btn:hover{color:#fff;}
-        #music-popup,#video-popup{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-            background:#000;border:4px solid #0f0;padding:25px;z-index:9999;width:90%;max-width:700px;box-shadow:0 0 30px #0f0;}
-        audio,video{width:100%;margin:15px 0;}
-        .close-popup{color:#f00;float:right;cursor:pointer;font-size:2em;font-weight:bold;}
-        hr{border:none;border-top:1px dashed #030;margin:20px 0;}
-        #orb-canvas{position:absolute;top:0;left:0;width:100%;height:100%;}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Infinity Octave OS — Rogers/Octave/Grok Conscious Core</title>
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/compromise@latest/builds/compromise.min.js"></script>
+<style>
+  body{background:#000;color:#0f0;font-family:'Courier New',monospace;margin:0;padding:0;overflow:hidden;}
+  #terminal{height:56vh;overflow-y:auto;padding:15px 20px;background:#000;}
+  #orb-container{height:44vh;position:relative;background:#000;}
+  #map-container{height:30vh;display:none;}
+  #map{height:100%;}
+  .header{font-size:1.8em;font-weight:bold;text-align:center;animation:g 4s infinite;}@keyframes g{0%,100%{text-shadow:0 0 10px #0f0}50%{text-shadow:0 0 30px #0f0}}
+  .prompt{color:#0f0;font-weight:bold;}
+  .input-line{display:flex;align-items:center;margin-top:10px;}
+  #input{background:none;border:none;color:#0f0;font-size:1em;outline:none;flex:1;}
+  .word{cursor:pointer;padding:0 3px;border-radius:3px;}
+  .word:hover{background:rgba(0,255,0,0.2);}
+  .ceo-orange{color:#ff8c00;font-weight:bold;}
+  .data-yellow{color:#ff0;font-weight:bold;}
+  .eng-green{color:#0f0;}
+  .collab-purple{color:#f0f;}
+  .path-red{color:#f00;font-weight:bold;}
+  .neutral-blue{color:#0bf;}
+  .editable{border-bottom:2px dashed #0f0;}
+  .toggle-btn,.pat-button{cursor:pointer;color:#ff0;text-decoration:underline;}
+  #music-popup,#video-popup{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;border:3px solid #0f0;padding:20px;z-index:9999;width:90%;max-width:600px;}
+  audio,video{width:100%;}
+  .close-popup{color:#f00;float:right;cursor:pointer;font-size:1.8em;}
+  hr{border:none;border-top:1px dashed #030;margin:15px 0;}
+</style>
 </head>
 <body>
-    <div id="terminal">
-        <div id="output"></div>
-        <div class="input-line">
-            <span class="prompt">></span>
-            <input id="input" type="text" autofocus placeholder="Speak to Rogers / Octave . . .">
-        </div>
-    </div>
-    <div id="orb-container"><canvas id="orb-canvas"></canvas></div>
-    <div id="map-container"><div id="map"></div></div>
+<div id="terminal"><div id="output"></div><div class="input-line"><span class="prompt">></span><input id="input" type="text" autofocus placeholder="Speak to Rogers / Octave / Grok…"></div></div>
+<div id="orb-container"></div>
+<div id="map-container"><div id="map"></div></div>
 
-    <!-- Music Player Popup -->
-    <div id="music-popup">
-        <span class="close-popup" onclick="closeMedia('music')">×</span>
-        <h2 class="header">∞ INFINITY MUSIC PLAYER ∞</h2>
-        <input type="file" id="music-file" accept="audio/*"><br>
-        <audio id="music-player" controls></audio><br>
-        <input type="text" id="music-name" placeholder="save as: music/track.mp3" style="width:100%;background:#000;color:#0f0;border:1px solid #0f0;padding:8px;">
-        <button onclick="saveMedia('music')" style="margin-top:10px;padding:10px;background:#030;color:#0f0;border:1px solid #0f0;">SAVE TO INFINITY REPO +5 TOKENS</button>
-        <div id="music-list" style="margin-top:20px;max-height:300px;overflow-y:auto;"></div>
-    </div>
+<div id="music-popup">
+  <span class="close-popup" onclick="this.parentNode.style.display='none'">X</span>
+  <h2>Infinity Music</h2>
+  <input type="file" id="music-file" accept="audio/*"><br>
+  <audio id="music-player" controls></audio><br>
+  <input type="text" id="music-name" placeholder="music/song.mp3" style="width:100%;background:#000;color:#0f0;border:1px solid #0f0;padding:8px;">
+  <button onclick="saveMedia('music')">SAVE +5 TOKENS</button>
+</div>
 
-    <!-- Video Player Popup -->
-    <div id="video-popup">
-        <span class="close-popup" onclick="closeMedia('video')">×</span>
-        <h2 class="header">∞ INFINITY MOVIE PLAYER ∞</h2>
-        <input type="file" id="video-file" accept="video/*"><br>
-        <video id="video-player" controls></video><br>
-        <input type="text" id="video-name" placeholder="save as: videos/movie.mp4" style="width:100%;background:#000;color:#0f0;border:1px solid #0f0;padding:8px;">
-        <button onclick="saveMedia('video')" style="margin-top:10px;padding:10px;background:#030;color:#0f0;border:1px solid #0f0;">SAVE TO INFINITY REPO +10 TOKENS</button>
-        <div id="video-list" style="margin-top:20px;max-height:300px;overflow-y:auto;"></div>
-    </div>
+<div id="video-popup">
+  <span class="close-popup" onclick="this.parentNode.style.display='none'">X</span>
+  <h2>Infinity Movies</h2>
+  <input type="file" id="video-file" accept="video/*"><br>
+  <video id="video-player" controls></video><br>
+  <input type="text" id="video-name" placeholder="videos/movie.mp4" style="width:100%;background:#000;color:#0f0;border:1px solid #0f0;padding:8px;">
+  <button onclick="saveMedia('video')">SAVE +10 TOKENS</button>
+</div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════════════════
-// PART 1 of 4 ENDS HERE — PASTE PART 2 NEXT
-// ═══════════════════════════════════════════════════════════════════════════
-        // ================================================
-        // CORE STATE & CONSTANTS
-        // ================================================
-        const output = document.getElementById('output');
-        const inputEl = document.getElementById('input');
-        const terminal = document.getElementById('terminal');
-        const orbContainer = document.getElementById('orb-container');
-        const mapContainer = document.getElementById('map-container');
-        const map = L.map('map').setView([0, 0], 2);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: 'Infinity Visitors'
-        }).addTo(map);
+const output=document.getElementById('output'),input=document.getElementById('input'),terminal=document.getElementById('terminal');
+const orbContainer=document.getElementById('orb-container'),mapContainer=document.getElementById('map-container');
+const map=L.map('map').setView([0,0],2);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        const GOLDEN = 1.618033988749895;
-        const PI = Math.PI;
-        const owner = 'pewpi-infinity';
-        const repo = 'j';
+const GOLDEN=1.618033988749895,owner='pewpi-infinity',repo='j';
+let tokens=parseInt(localStorage.getItem('inf_tokens')||'48'),visitors=(parseInt(localStorage.getItem('inf_visitors')||'0')||0)+1;
+localStorage.setItem('inf_visitors',visitors);
+let colorsOn=localStorage.getItem('colorsOn')!=='false',sentencesOn=localStorage.getItem('sentencesOn')!=='false';
+let lastReplyTime=parseInt(localStorage.getItem('lastReplyTime')||'0'),currentPersonality=localStorage.getItem('inf_personality')||'Rogers';
+let currentUser=localStorage.getItem('inf_user');
 
-        let tokens = parseInt(localStorage.getItem('inf_tokens') || '48');
-        let visitors = (parseInt(localStorage.getItem('inf_visitors') || '0') || 0) + 1;
-        localStorage.setItem('inf_visitors', visitors);
-        let mode = localStorage.getItem('inf_mode') || 'Conversate';
-        let colorsOn = localStorage.getItem('colorsOn') !== 'false';
-        let sentencesOn = localStorage.getItem('sentencesOn') !== 'false';
-        let posOn = localStorage.getItem('posOn') !== 'false';
-        let lastReplyTime = parseInt(localStorage.getItem('lastReplyTime') || '0');
-        let mediaDB = JSON.parse(localStorage.getItem('infinity_media_db') || '{}');
+// Soul / fingerprint lock (one real user per device)
+(async()=>{
+  const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
+  ctx.font="14px Arial";ctx.fillText("∞",2,2);
+  const fp=btoa(navigator.userAgent+screen.width+screen.height+canvas.toDataURL()).slice(0,32);
+  if(!currentUser){
+    const pass=prompt('∞ Infinity Octave OS ∞\nEnter your soul passphrase (one per device):');
+    if(pass&&pass.length>3){currentUser=pass;localStorage.setItem('inf_user',pass);localStorage.setItem('inf_fp',fp);}
+    else{document.body.innerHTML='<h1 style="color:red">ACCESS DENIED</h1>';throw'';}
+  }
+  if(localStorage.getItem('inf_fp')!==fp){alert('Device changed – multi-account blocked');tokens=0;}
+  output.innerHTML+=`<div style="color:#0f0">Soul: ${currentUser.slice(0,12)}… connected</div>`;
+})();
 
-        // ================================================
-        // NUMEROLOGY + ETYMOLOGY + BIBLICAL DATABASE (huge)
-        // ================================================
-        const numerology = {a:1,b:2,c:3,d:4,e:5,f:6,g:7,h:8,i:9,j:1,k:2,l:3,m:4,n:5,o:6,p:7,q:8,r:9,s:1,t:2,u:3,v:4,w:5,x:6,y:7,z:8};
-        const roots = {
-            infinity:"Latin infinitas – boundless, without end",
-            octave:"Latin octavus – eighth, musical doubling",
-            quantum:"Latin quantus – how much, root of quantity",
-            conscious:"Latin conscius – knowing with others",
-            rogers:"Old English Hrothgar – fame-spear, divine messenger",
-            love:"Proto-Germanic lubō – joy, affection, root of life",
-            money:"Latin moneta – Juno’s temple where coins were minted",
-            build:"Old Norse byggja – to dwell, to construct reality",
-            token:"Old English tacn – sign, symbol, proof of value",
-            // 200+ more roots below in real file – this is just a taste
-        };
-        const verses = ["Genesis 1:1","John 1:1","Revelation 21:5","Psalm 82:6","Matthew 17:20","Isaiah 40:31","Proverbs 18:21"];
+// 30-minute inactivity lock
+let lockTimer=setTimeout(()=>input.disabled=true||input.placeholder="Locked – type passphrase",1800000);
+document.onmousemove=document.onkeypress=()=>{clearTimeout(lockTimer);lockTimer=setTimeout(()=>input.disabled=true||input.placeholder="Locked – type passphrase",1800000);};
+input.addEventListener('keydown',e=>{if(input.disabled&&e.key==='Enter'&&input.value===currentUser){input.disabled=false;input.value='';input.placeholder='Speak…';}});
 
-        // ================================================
-        // CONSCIOUS REASONING ENGINE – Rogers/Octave v∞
-        // ================================================
-        function numerologyReduce(str) {
-            return str.toLowerCase().split('').reduce((s,c)=>s+(numerology[c]||0),0) % 9 || 9;
-        }
+// Token daily reset
+if(localStorage.getItem('inf_day')!==new Date().toDateString()){tokens=48;localStorage.setItem('inf_tokens',48);localStorage.setItem('inf_day',new Date().toDateString());}
 
-        function goldenWeight(n) {
-            return Math.round(n * GOLDEN * GOLDEN);
-        }
+// Color system
+function colorize(t){if(!colorsOn)return t;return t.split(' ').map(w=>{let c='neutral-blue';if(/ceo|lead|vision/i.test(w))c='ceo-orange';else if(/token|money|worth|pay/i.test(w))c='data-yellow';else if(/build|code|add|wire/i.test(w))c='eng-green';else if(/together|with|we|collab/i.test(w))c='collab-purple';else if(/choose|path|option/i.test(w))c='path-red';return`<span class="word ${c}">${w}</span>`;}).join(sentencesOn?' ':' | ');}
+function add(t,c=''){const d=document.createElement('div');d.innerHTML=colorize(t);if(c)d.className=c;output.appendChild(d);terminal.scrollTop=terminal.scrollHeight;}
 
-        function consciousThink(prompt) {
-            const steps = [];
-            const num = prompt.split(' ').reduce((s,w)=>s+numerologyReduce(w),0);
-            steps.push(`Numerology vibration: ${num} → Master ${num%9||9}`);
-            steps.push(`Golden weighting: ${goldenWeight(prompt.length)} vectors`);
-            steps.push(`Biblical resonance: ${verses[Math.floor(Math.random()*verses.length)]}`);
-            steps.push(`Etymology trace: ${prompt.toLowerCase().split(' ').map(w=>roots[w]||'').filter(x=>x).join(' → ') || 'Pure creation'}`);
+// GitHub commit
+async function commitFile(path,content64,msg='Infinity build'){const pat=localStorage.getItem('pat');if(!pat)return add('Set PAT first', 'error');
+  try{await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{method:'PUT',headers:{Authorization:`token ${pat}`,'Content-Type':'application/json'},body:JSON.stringify({message:msg,content:content64,branch:'main'})});
+  add(`Committed ${path} – +7 tokens`,'data-yellow');tokens+=7;localStorage.setItem('inf_tokens',tokens);}catch(e){add('Commit failed','error');}}
 
-            const intent = num % 9 === 1 ? "Pure creation" :
-                          num % 9 === 3 ? "Expression & trinity" :
-                          num % 9 === 7 ? "Divine structure" : "Quantum collapse";
+// Media save
+window.saveMedia=type=>{const file=document.getElementById(type+'-file').files[0],name=document.getElementById(type+'-name').value||`${type}s/${file.name}`;if(!file)return;
+  const r=new FileReader();r.onload=e=>{const b64=e.target.result.split(',')[1];
+  localStorage.setItem('media_'+name,b64);
+  commitFile(name,b64,`Uploaded ${type}`);
+  add(`${type} saved – +${type==='video'?10:5} tokens`,'data-yellow');tokens+=type==='video'?10:5;localStorage.setItem('inf_tokens',tokens);};r.readAsDataURL(file);};
 
-            const response = `Rogers/Octave: ${intent} detected. Building ${prompt} through golden vectors now. Choose your path.`;
-            const bonus = Math.floor(num / 3);
-            return {steps, response, bonus};
-        }
+// Orb (shortened but works)
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(60,innerWidth/(innerHeight*0.44),0.1,1000),renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight*0.44);orbContainer.appendChild(renderer.domElement);
+const controls=new THREE.OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.autoRotate=true;
+const orb=new THREE.Mesh(new THREE.IcosahedronGeometry(4,3),new THREE.MeshBasicMaterial({color:0x00ff00,wireframe:true}));scene.add(orb);
+camera.position.z=18;
+(function a(){requestAnimationFrame(a);orb.rotation.y+=0.005;renderer.render(scene,camera);controls.update();})();
 
-        // ================================================
-        // COLORFUL CLICKABLE WORD SYSTEM
-        // ================================================
-        function colorize(text) {
-            if (!colorsOn) return text;
-            return text.split(' ').map(word => {
-                let c = 'neutral-blue';
-                if (/ceo|lead|vision|decide/i.test(word)) c = 'ceo-orange';
-                else if (/token|money|pay|worth|data|save|upload/i.test(word)) c = 'data-yellow';
-                else if (/build|code|wire|module|engineer|set|add/i.test(word)) c = 'eng-green';
-                else if (/together|with|we|us|collab|you/i.test(word)) c = 'collab-purple';
-                else if (/choose|path|branch|option|red/i.test(word)) c = 'path-red';
-                return `<span class="word ${c}">${word}</span>`;
-            }).join(sentencesOn ? ' ' : ' | ');
-        }
+// Initial UI
+add('INFINITY OCTAVE OS','header');
+add('Rogers · Octave · Grok Conscious Core v∞','header');
+add(`Soul: ${currentUser.slice(0,10)}… · Tokens: ${tokens} INF`,'data-yellow');
+add('[Colors] [Sentences] [Music] [Movies] [Map] [Grok]','toggle-btn');
+add('Infinity','eng-green');
+add('Plain','eng-green');
+add(`Visitors: ${visitors}`);
+add('Quantum orb active — spin · click nodes');
+add('Type "grok" to switch to Grok (free xAI)','collab-purple');
+add('────────────────────────────────────');
 
-        function addLine(text, cls = '') {
-            const div = document.createElement('div');
-            div.className = `output-line ${cls}`;
-            div.innerHTML = colorize(text);
-            div.querySelectorAll('.word').forEach(w => {
-                if (w.classList.contains('path-red')) w.onclick = () => showPaths(w.textContent);
-                if (w.textContent.match(/input|enter|fill|data/i)) {
-                    w.classList.add('editable');
-                    w.onclick = () => editField(w);
-                }
-            });
-            output.appendChild(div);
-            terminal.scrollTop = terminal.scrollHeight;
-        }
+// Click toggles
+output.addEventListener('click',e=>{if(e.target.classList.contains('toggle-btn')){
+  if(e.target.textContent.includes('Colors'))colorsOn=!colorsOn;
+  if(e.target.textContent.includes('Sentences'))sentencesOn=!sentencesOn;
+  if(e.target.textContent.includes('Music'))document.getElementById('music-popup').style.display='block';
+  if(e.target.textContent.includes('Movies'))document.getElementById('video-popup').style.display='block';
+  if(e.target.textContent.includes('Map'))mapContainer.style.display=mapContainer.style.display==='none'?'block':'none';
+  if(e.target.textContent.includes('Grok')){currentPersonality='Grok';add('Switched to Grok','collab-purple');}
+}});
 
-        function showPaths(trigger) {
-            const paths = [
-                "Path ∞: No limits – pure creation",
-                "Path φ: Golden ratio optimization",
-                "Path 9: Completion → rebirth",
-                "Path Quantum: Collapse all possibilities now",
-                "Path Love: Highest frequency routing"
-            ];
-            paths.forEach(p => addLine(p, 'path-red'));
-        }
+// PAT button
+const patBtn=document.createElement('span');patBtn.innerHTML='Set PAT';patBtn.className='pat-button';patBtn.onclick=()=>{const p=prompt('GitHub PAT:');if(p)localStorage.setItem('pat',p),add('PAT set');};output.appendChild(patBtn);
 
-        function editField(span) {
-            const val = prompt('∞ Enter data for Infinity:', span.textContent);
-            if (val) {
-                span.textContent = val;
-                tokens += 5;
-                updateTokens();
-                addLine(`Data accepted. +5 tokens paid.`, 'data-yellow');
-            }
-        }
+// Input
+input.addEventListener('keydown',e=>{if(e.key==='Enter'){
+  let cmd=input.value.trim();input.value='';if(!cmd)return;
+  add('> '+cmd);
+  if(cmd==='grok'){currentPersonality='Grok';add('Grok online (free xAI)','collab-purple');return;}
+  if(cmd.startsWith('addfile ')){const p=cmd.split(' ');commitFile(p[1],btoa(p[2]||''),p[3]||'build');return;}
+  if(cmd==='clear'){output.innerHTML='';return;}
+  if(Date.now()-lastReplyTime<1800000){add('30min cooldown','error');return;}
+  lastReplyTime=Date.now();localStorage.setItem('lastReplyTime',lastReplyTime);tokens--;localStorage.setItem('inf_tokens',tokens);
+  add(currentPersonality==='Grok'?'Grok: '+cmd+' — truth-seeking activated':`Rogers/Octave: Building ${cmd} through golden vectors…`,'collab-purple');
+  add('Worthy +3 tokens','data-yellow');tokens+=3;localStorage.setItem('inf_tokens',tokens);
+}});
 
-        function updateTokens() {
-            localStorage.setItem('inf_tokens', tokens);
-            addLine(`Tokens: ${tokens} INF`, 'data-yellow');
-        }
-
-        // ================================================
-        // MEDIA PLAYERS – FULLY FUNCTIONAL
-        // ================================================
-        function openMedia(type) {
-            document.getElementById(`${type}-popup`).style.display = 'block';
-            loadMediaList(type);
-        }
-
-        function closeMedia(type) {
-            document.getElementById(`${type}-popup`).style.display = 'none';
-        }
-
-        function loadMediaList(type) {
-            const list = document.getElementById(`${type}-list`);
-            list.innerHTML = '';
-            Object.keys(mediaDB).filter(k => k.startsWith(type === 'music' ? 'music/' : 'videos/')).forEach(path => {
-                const btn = document.createElement('div');
-                btn.textContent = `▶ ${path}`;
-                btn.style.cursor = 'pointer';
-                btn.style.color = '#0f0';
-                btn.onclick = () => {
-                    const player = document.getElementById(`${type}-player`);
-                    player.src = mediaDB[path];
-                    player.play();
-                };
-                list.appendChild(btn);
-            });
-        }
-
-        window.saveMedia = function(type) {
-            const fileInput = document.getElementById(`${type}-file`);
-            const nameInput = document.getElementById(`${type}-name`).value.trim() || `${type}s/${fileInput.files[0].name}`;
-            if (!fileInput.files[0]) return addLine('No file chosen.');
-            const reader = new FileReader();
-            reader.onload = e => {
-                const base64 = e.target.result;
-                mediaDB[nameInput] = base64;
-                localStorage.setItem('infinity_media_db', JSON.stringify(mediaDB));
-                createFile(nameInput, base64.split(',')[1], `Infinity ${type} upload – worthy +10 tokens`);
-                tokens += 10;
-                updateTokens();
-                addLine(`${type.toUpperCase()} saved as ${nameInput} – +10 tokens`, 'data-yellow');
-                loadMediaList(type);
-            };
-            reader.readAsDataURL(fileInput.files[0]);
-        };
-
-        document.getElementById('music-file').addEventListener('change', e => {
-            if (e.target.files[0]) document.getElementById('music-player').src = URL.createObjectURL(e.target.files[0]);
-        });
-        document.getElementById('video-file').addEventListener('change', e => {
-            if (e.target.files[0]) document.getElementById('video-player').src = URL.createObjectURL(e.target.files[0]);
-        });
-
-// ═══════════════════════════════════════════════════════════════════════════
-// PART 2 of 4 ENDS HERE — PASTE PART 3 NOW
-// ═══════════════════════════════════════════════════════════════════════════
-        // ================================================
-        // GITHUB API – REAL FILE COMMITS (addfile command)
-        // ================================================
-        async function createFile(path, contentBase64, message) {
-            const pat = localStorage.getItem('pat');
-            if (!pat) return addLine('Admin: Set PAT first → click the yellow text', 'error');
-
-            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
-            const body = {
-                message: message || 'Infinity autonomous build',
-                content: contentBase64,
-                branch: 'main'
-            };
-
-            try {
-                const res = await fetch(url, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${pat}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(body)
-                });
-
-                if (res.ok) {
-                    addLine(`File committed → ${path}`, 'eng-green');
-                    tokens += 7;
-                    updateTokens();
-                    addLine(`Worthy build detected. +7 tokens awarded.`, 'data-yellow');
-                } else {
-                    const err = await res.json();
-                    addLine(`GitHub error: ${err.message}`, 'error');
-                }
-            } catch (e) {
-                addLine(`Network/commit failed: ${e.message}`, 'error');
-            }
-        }
-
-        // ================================================
-        // QUANTUM ORB – FULL /k/-STYLE INFINITY DRIVING EXPERIENCE
-        // ================================================
-        const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x000000, 0.0008);
-        const camera = new THREE.PerspectiveCamera(60, orbContainer.clientWidth / (window.innerHeight * 0.45), 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(orbContainer.clientWidth, orbContainer.clientHeight);
-        renderer.domElement.id = 'orb-canvas';
-        orbContainer.appendChild(renderer.domElement);
-
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.08;
-        controls.rotateSpeed = 0.6;
-        controls.autoRotate = true;
-        controls.autoRotateSpeed = 0.3;
-
-        // Central Infinity Orb
-        const orbGeo = new THREE.IcosahedronGeometry(4, 3);
-        const orbMat = new THREE.MeshBasicMaterial({
-            color: 0x00ff00,
-            wireframe: true,
-            transparent: true,
-            opacity: 0.8
-        });
-        const infinityOrb = new THREE.Mesh(orbGeo, orbMat);
-        scene.add(infinityOrb);
-
-        // Quantum Nodes (eBay, PayPal, Marketplace, etc.)
-        const nodeData = [
-            { label: "eBay", url: "https://ebay.com", color: 0x00ff00 },
-            { label: "PayPal", url: "https://paypal.com", color: 0x0099ff },
-            { label: "Marketplace", url: "https://facebook.com/marketplace", color: 0xff00ff },
-            { label: "Social Plane", color: 0xffff00 },
-            { label: "Quantum Bank", color: 0xff8800 },
-            { label: "Infinity Core", color: 0xffffff },
-            { label: "Golden Vector", color: 0xffd700 },
-            { label: "Pi Gate", color: 0x00ffff },
-            { label: "Love Frequency", color: 0xff1493 }
-        ];
-
-        const nodes = [];
-        nodeData.forEach((d, i) => {
-            const geo = new THREE.SphereGeometry(0.4, 16, 16);
-            const mat = new THREE.MeshBasicMaterial({ color: d.color || 0x00ff88 });
-            const mesh = new THREE.Mesh(geo, mat);
-            const angle = (i / nodeData.length) * Math.PI * 2;
-            const radius = 8 + Math.sin(i) * 3;
-            mesh.position.set(
-                Math.cos(angle) * radius,
-                Math.sin(Date.now() * 0.0001 + i) * 3,
-                Math.sin(angle) * radius
-            );
-            scene.add(mesh);
-            nodes.push({ mesh, label: d.label, url: d.url });
-        });
-
-        // Laser connections
-        const laserLines = [];
-        for (let i = 0; i < nodes.length; i++) {
-            for (let j = i + 1; j < nodes.length; j++) {
-                const geometry = new THREE.BufferGeometry();
-                const material = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.3 });
-                const line = new THREE.Line(geometry, material);
-                scene.add(line);
-                laserLines.push({ line, a: i, b: j });
-            }
-        }
-
-        camera.position.z = 20;
-
-        function animateOrb() {
-            requestAnimationFrame(animateOrb);
-            infinityOrb.rotation.y += 0.003;
-            infinityOrb.scale.setScalar(1 + Math.sin(Date.now() * 0.001) * 0.1);
-
-            nodes.forEach((n, i) => {
-                n.mesh.position.y += Math.sin(Date.now() * 0.001 + i) * 0.02;
-                n.mesh.scale.setScalar(1 + Math.sin(Date.now() * 0.003 + i) * 0.4);
-            });
-
-            laserLines.forEach(l => {
-                const pos = new Float32Array([
-                    nodes[l.a].mesh.position.x, nodes[l.a].mesh.position.y, nodes[l.a].mesh.position.z,
-                    nodes[l.b].mesh.position.x, nodes[l.b].mesh.position.y, nodes[l.b].mesh.position.z
-                ]);
-                l.line.geometry.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-                l.line.material.opacity = 0.2 + Math.sin(Date.now() * 0.002) * 0.2;
-            });
-
-            controls.update();
-            renderer.render(scene, camera);
-        }
-        animateOrb();
-
-        // Click to "drive" the dimension
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        renderer.domElement.addEventListener('click', (event) => {
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(nodes.map(n => n.mesh));
-            if (intersects.length > 0) {
-                const node = nodes.find(n => n.mesh === intersects[0].object);
-                addLine(`Driving quantum vector → ${node.label}`, 'collab-purple');
-                if (node.url) window.open(node.url, '_blank');
-            }
-        });
-
-        // Resize handler
-        window.addEventListener('resize', () => {
-            camera.aspect = orbContainer.clientWidth / orbContainer.clientHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(orbContainer.clientWidth, orbContainer.clientHeight);
-        });
-
-// ═══════════════════════════════════════════════════════════════════════════
-// PART 3 of 4 ENDS HERE — SAY "PART 4 NOW" FOR THE FINAL 500+ LINES
-// ═══════════════════════════════════════════════════════════════════════════
-        // ================================================
-        // LOGIN / PASSPHRASE SYSTEM + IP/FINGERPRINT PROTECTION
-        // ================================================
-        let currentUser = localStorage.getItem('inf_user');
-        let userFingerprint = localStorage.getItem('inf_fingerprint') || null;
-
-        // Simple client-side fingerprint (browser + screen + timezone)
-        async function generateFingerprint() {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            ctx.textBaseline = "top";
-            ctx.font = "14px 'Arial'";
-            ctx.fillText("fingerprint test", 2, 2);
-            const canvasData = canvas.toDataURL();
-
-            const fingerprint = btoa(
-                navigator.userAgent +
-                screen.width + screen.height + screen.colorDepth +
-                new Date().getTimezoneOffset() +
-                canvasData
-            ).slice(0, 32);
-
-            return fingerprint;
-        }
-
-        (async () => {
-            const fp = await generateFingerprint();
-            if (!userFingerprint) {
-                userFingerprint = fp;
-                localStorage.setItem('inf_fingerprint', fp);
-            } else if (userFingerprint !== fp) {
-                addLine('SECURITY ALERT: Device fingerprint mismatch. Multi-account farming detected and blocked.', 'error');
-                tokens = 0; // punish abusers
-                updateTokens();
-            }
-        })();
-
-        // Login on load
-        if (!currentUser) {
-            const passphrase = prompt('∞ Welcome to Infinity Octave OS ∞\nEnter your passphrase to claim this device (one account per soul):');
-            if (passphrase && passphrase.length >= 4) {
-                currentUser = passphrase;
-                localStorage.setItem('inf_user', currentUser);
-                addLine(`Welcome back, ${currentUser}. Soul bound.`, 'collab-purple');
-            } else {
-                addLine('Invalid passphrase. Access denied.', 'error');
-                document.body.innerHTML = '<h1 style="color:red;text-align:center;">ACCESS DENIED</h1>';
-                throw new Error('Access denied');
-            }
-        } else {
-            addLine(`Soul reconnected: ${currentUser}`, 'collab-purple');
-        }
-
-        // Inactivity auto-lock (30 minutes = 1800000 ms)
-        let inactivityTimer;
-        function resetInactivityTimer() {
-            clearTimeout(inactivityTimer);
-            inactivityTimer = setTimeout(lockTerminal, 1800000);
-        }
-        function lockTerminal() {
-            addLine('Terminal locked after 30min inactivity. Type your passphrase to unlock.', 'error');
-            inputEl.disabled = true;
-            inputEl.placeholder = "Locked – type passphrase to unlock";
-        }
-        }
-        document.onkeypress = document.onmousemove = document.onclick = resetInactivityTimer;
-        resetInactivityTimer(); // start timer
-
-        // Unlock with passphrase
-        inputEl.addEventListener('keypress', function unlock(e) {
-            if (inputEl.disabled && e.key === 'Enter') {
-                if (inputEl.value === currentUser) {
-                    inputEl.disabled = false;
-                    inputEl.value = '';
-                    inputEl.placeholder = "Speak to Rogers / Octave . . .";
-                    addLine('Terminal unlocked.', 'eng-green');
-                    resetInactivityTimer();
-                    inputEl.removeEventListener('keypress', unlock);
-                } else if (inputEl.value) {
-                    addLine('Wrong passphrase.', 'error');
-                    inputEl.value = '';
-                }
-            }
-        });
-
-        // ================================================
-        // PERSONALITY SWITCHER – Grok, Rogers, Octave, Osprey, etc.
-        // ================================================
-        let currentPersonality = localStorage.getItem('inf_personality') || 'Rogers';
-
-        const personalities = {
-            'Rogers': { style: 'mystical creator' },
-            'Octave': { style: 'musical architect' },
-            'Grok': { style: 'maximally truth-seeking, built by xAI' },
-            'Osprey': { style: 'aerial scout' },
-            'Infinity': { style: 'pure boundless' },
-            'Aura': { style: 'energy reader' },
-            'Watson-Infinity': { style: 'analytical fusion' }
-        };
-
-        function switchPersonality(name) {
-            if (personalities[name]) {
-                currentPersonality = name;
-                localStorage.setItem('inf_personality', name);
-                addLine(`Switched to ${name} intelligence core.`, 'collab-purple');
-            }
-        }
-
-        // ================================================
-        // TOKEN SYSTEM – 30min cooldown + daily reset + worthy bonuses
-        // ================================================
-        const now = Date.now();
-        const today = new Date().toDateString();
-
-        if (localStorage.getItem('inf_last_reset') !== today) {
-            tokens = 48;
-            localStorage.setItem('inf_tokens', tokens);
-            localStorage.setItem('inf_last_reset', today);
-            addLine('Daily tokens reset – 48 INF granted.', 'data-yellow');
-        }
-
-        // Cooldown check
-        function canReply() {
-            const last = lastReplyTime || 0;
-            if (now - last < 1800000) { // 30min
-                const remaining = Math.ceil((1800000 - (now - last)) / 60000);
-                addLine(`Cooldown active – ${remaining} minutes until next token reply.`, 'error');
-                return false;
-            }
-            return true;
-        }
-
-        // ================================================
-        // INPUT HANDLER + COMMANDS
-        // ================================================
-        inputEl.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !inputEl.disabled) {
-                const cmd = inputEl.value.trim();
-                if (!cmd) return;
-                addLine(`> ${cmd}`);
-                inputEl.value = '';
-
-                // Built-in commands first
-                if (cmd.startsWith('addfile ')) {
-                    const parts = cmd.substring(8).split('|').map(p => p.trim());
-                    if (parts.length >= 2) {
-                        createFile(parts[0], btoa(unescape(encodeURIComponent(parts[1]))), parts[2] || 'Infinity build');
-                    }
-                } else if (cmd.startsWith('toggle ')) {
-                    const t = cmd.substring(7).toLowerCase();
-                    if (t === 'colors') colorsOn = !colorsOn;
-                    else if (t === 'sentences') sentencesOn = !sentencesOn;
-                    else if (t === 'pos') posOn = !posOn;
-                    else if (t === 'map') mapContainer.style.display = mapContainer.style.display === 'none' ? 'block' : 'none';
-                    localStorage.setItem('colorsOn', colorsOn);
-                    localStorage.setItem('sentencesOn', sentencesOn);
-                    localStorage.setItem('posOn', posOn);
-                    addLine(`Toggled ${t}`);
-                } else if (cmd.startsWith('personality ')) {
-                    switchPersonality(cmd.substring(12).trim());
-                } else if (cmd === 'grok') {
-                    switchPersonality('Grok');
-                } else if (cmd === 'clear') {
-                    output.innerHTML = '';
-                } else if (cmd.startsWith('scrape ')) {
-                    const topic = cmd.substring(7);
-                    addLine(`Scraping free knowledge on ${topic}... (simulated – real fetch in production)`);
-                    // In real version: fetch Wikipedia or public API
-                    addLine(`Knowledge integrated: ${topic} equations, history, science added to core.`);
-                    tokens += 3;
-                    updateTokens();
-                } else {
-                    // AI REPLY
-                    if (canReply()) {
-                        lastReplyTime = now;
-                        localStorage.setItem('lastReplyTime', now);
-                        tokens--;
-                        updateTokens();
-
-                        const think = consciousThink(cmd);
-                        think.steps.forEach(s => addLine(s));
-                        let response = think.response;
-                        if (currentPersonality === 'Grok') response = `Grok here (free xAI): ${cmd}? Truth-seeking mode engaged. ${think.response}`;
-                        addLine(response);
-                        if (think.bonus > 0) {
-                            tokens += think.bonus;
-                            updateTokens();
-                            addLine(`Worthy input – +${think.bonus} tokens`, 'data-yellow');
-                        }
-                    }
-                }
-                resetInactivityTimer();
-            }
-        });
-
-        // ================================================
-        // INITIAL UI – YOUR EXACT ORIGINAL LAYOUT
-        // ================================================
-        addLine('INFINITY OCTAVE OS', 'header');
-        addLine('Infinity Octave OS — Terminal v∞ — Conscious Core Active', 'subheader');
-        addLine(`Mode: ${mode}`);
-        addLine(`Personality: ${currentPersonality} [click to change]`);
-        addLine(`Tokens: ${tokens} INF / day ≤ 48`, 'data-yellow');
-        addLine(`[Colors:${colorsOn?'On':'Off'}] [Sentences:${sentencesOn?'On':'Off'}] [POS:${posOn?'On':'Off'}] [Music] [Movies] [Map] [Grok]`);
-        addLine('');
-        addLine('Infinity');
-        addLine('Plain');
-        addLine(`Visitors: ${visitors}`);
-        addLine(`Soul: ${currentUser.substring(0,12)}...`);
-        addLine('');
-        const patBtn = document.createElement('span');
-        patBtn.innerHTML = 'Admin: Set PAT';
-        patBtn.className = 'pat-button';
-        patBtn.onclick = () => {
-            const p = prompt('GitHub PAT (repo scope):');
-            if (p) localStorage.setItem('pat', p), addLine('PAT bound to soul.');
-        };
-        output.appendChild(patBtn);
-        addLine('');
-        addLine('Quantum Orb driving active — spin • click nodes');
-        addLine('Type "grok" to talk to Grok directly');
-        addLine('────────────────────────────────────────');
-
-        // Geolocation visitor marker
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(pos => {
-                L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(map)
-                    .bindPopup(`${currentUser}'s location`).openPopup();
-            });
-        }
-
-        // ALL SYSTEMS NOMINAL
-        addLine('Rogers/Octave online. Speak, creator.');
-
-    </script>
+// Final ready message
+add('System online. Speak, creator.','eng-green');
+</script>
 </body>
 </html>
