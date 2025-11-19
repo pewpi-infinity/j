@@ -231,6 +231,81 @@
     <div id="pat-status" style="color:#0f0; margin-top:6px;"></div>
   </div>
 <!-- SECRET ADMIN PANEL (already exists above this) -->
+<!-- VIEW COUNTER + VISITOR MAP -->
+<div id="viewBox" style="
+  position: fixed; 
+  top: 20px; 
+  right: 20px; 
+  background: #020714dd;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid #2aaaff;
+  box-shadow: 0 0 18px #0099ffaa, inset 0 0 8px #000;
+  font-size: 13px;
+  color: #b9d8ff;
+  backdrop-filter: blur(4px);
+  z-index: 9999;">
+  <div><strong>Visitors:</strong> <span id="viewCount">0</span></div>
+  <div id="visitorLoc" style="margin-top:4px; font-size:12px; color:#7ac7ff;"></div>
+  <canvas id="visitorMap" width="140" height="70" style="margin-top:8px; width:140px; height:70px;"></canvas>
+</div>
+
+<script>
+(async function(){
+
+  /* ---------------------------
+      LOAD & INCREMENT VIEWS
+  ----------------------------*/
+  const KEY = "infinity_page_views";
+  let count = Number(localStorage.getItem(KEY) || 0);
+  count++;
+  localStorage.setItem(KEY, count);
+  document.getElementById("viewCount").textContent = count;
+
+  /* ---------------------------
+      GEOLOCATION LOOKUP
+  ----------------------------*/
+  async function getGeo(){
+    try {
+      const r = await fetch("https://ipapi.co/json/");
+      return await r.json();
+    } catch(e){
+      return null;
+    }
+  }
+
+  const geo = await getGeo();
+  if(geo){
+    document.getElementById("visitorLoc").textContent =
+      `${geo.city || ""} ${geo.region || ""} ${geo.country_name || ""}`;
+    drawDot(geo.latitude, geo.longitude);
+  }
+
+  /* ---------------------------
+      WORLD MAP DOT (TINY)
+  ----------------------------*/
+  function drawDot(lat, lon){
+    const c = document.getElementById("visitorMap");
+    const ctx = c.getContext("2d");
+
+    // Draw glow map background
+    ctx.fillStyle = "#022";
+    ctx.fillRect(0,0,c.width,c.height);
+
+    // Convert coords to tiny map
+    let x = (lon + 180) * (c.width / 360);
+    let y = (90 - lat) * (c.height / 180);
+
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, Math.PI*2);
+    ctx.fillStyle = "#29d9ff";
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = "#29d9ff";
+    ctx.fill();
+  }
+
+})();
+</script>
 
 <!-- CORE SYSTEMS -->
 <script src="js/octave-core.js"></script>
