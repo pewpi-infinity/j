@@ -700,5 +700,58 @@
 <!-- ======================= -->
 <!-- END FULL VIDEO COMPONENT -->
 <!-- ======================= -->
+<!-- REAL Chrome / Android Picture-in-Picture -->
+<video id="realVideo" controls playsinline style="
+    width: 100%; 
+    max-width: 500px; 
+    border-radius: 12px;
+    display: none;
+"></video>
+
+<input type="file" id="realVidUpload" accept="video/*" 
+style="
+    margin: 20px 0; 
+    padding: 10px; 
+    background:#00eaff; 
+    border-radius:10px; 
+    font-weight:bold;
+">
+
+<script>
+const rv = document.getElementById("realVideo");
+const upload = document.getElementById("realVidUpload");
+
+// Load video immediately
+upload.addEventListener("change", () => {
+    const f = upload.files[0];
+    if (!f) return;
+
+    rv.src = URL.createObjectURL(f);
+    rv.style.display = "block";
+    rv.play();
+});
+
+// Enable REAL Chrome PiP (YouTube style)
+rv.addEventListener("enterpictureinpicture", () => {
+    console.log("Entered real PiP.");
+});
+
+rv.addEventListener("leavepictureinpicture", () => {
+    console.log("Exited real PiP.");
+});
+
+// Add double-tap PiP (like TikTok)
+rv.addEventListener("dblclick", async () => {
+    try {
+        if (!document.pictureInPictureElement) {
+            await rv.requestPictureInPicture();
+        } else {
+            await document.exitPictureInPicture();
+        }
+    } catch (e) {
+        console.log("PiP error:", e);
+    }
+});
+</script>
 </body>
 </html>
