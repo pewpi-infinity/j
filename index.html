@@ -631,5 +631,213 @@
 
 })();
 </script>
+<!-- ⬛ INFINITY MEDIA SYSTEM — MODERN, WORKING, NO CONFLICTS -->
+
+<style>
+  /* Isolate all styles in a namespace */
+  .inf-media * {
+    font-family: system-ui, sans-serif !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    box-sizing: border-box;
+  }
+
+  /* Floating Media Button */
+  #infMediaBtn {
+    position: fixed; bottom: 24px; right: 24px;
+    width: 70px; height: 70px;
+    border-radius: 20px;
+    border: none;
+    background: linear-gradient(145deg, #29d9ff, #147a96);
+    color: #001018;
+    font-size: 32px;
+    font-weight: 900;
+    cursor: pointer;
+    z-index: 99999;
+    box-shadow: 0 0 24px #29d9ff;
+  }
+
+  /* Player Panel */
+  #infMediaPanel {
+    position: fixed; bottom: 0; left: 0;
+    width: 100%; height: 63%;
+    background: #020712f5;
+    border-top: 2px solid #29d9ff70;
+    border-radius: 18px 18px 0 0;
+    padding: 20px;
+    display: none;
+    z-index: 99998;
+  }
+
+  #infMediaPanel h2 {
+    margin: 0; color: #29d9ff;
+    font-size: 22px;
+  }
+
+  /* Upload Area */
+  #infDropZone {
+    width: 100%;
+    height: 120px;
+    border: 2px dashed #29d9ff90;
+    border-radius: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #a6d9f7;
+    margin-top: 16px;
+    cursor: pointer;
+  }
+
+  /* Video Player */
+  #infVideo {
+    width: 100%;
+    margin-top: 16px;
+    border-radius: 12px;
+    background: #000;
+    outline: 2px solid #29d9ff40;
+  }
+
+  /* Save Button */
+  #infSaveBtn {
+    margin-top: 14px;
+    padding: 12px 18px;
+    background: linear-gradient(145deg, #29d9ff, #147a96);
+    border: none; border-radius: 12px;
+    font-size: 16px; font-weight: 700;
+    cursor: pointer;
+    color: #001018;
+    width: 100%;
+  }
+
+  /* Hamburger Drawer */
+  #infDrawerBtn {
+    position: fixed; top: 20px; left: 20px;
+    width: 52px; height: 52px;
+    background: #0b162ecc;
+    border: 2px solid #29d9ff;
+    border-radius: 14px;
+    color: #29d9ff;
+    font-size: 26px;
+    cursor: pointer; z-index: 99999;
+  }
+
+  #infDrawer {
+    position: fixed; top: 0; left: 0;
+    width: 300px; height: 100%;
+    background: #020712fb;
+    border-right: 2px solid #29d9ff50;
+    transform: translateX(-100%);
+    transition: 0.25s ease;
+    padding: 20px;
+    z-index: 99998;
+  }
+
+  #infDrawer.open { transform: translateX(0); }
+  #infDrawer h3 { color: #29d9ff; margin-top: 20px; }
+  .inf-item { color:#d7f2ff; padding:6px 0; cursor:pointer; border-bottom:1px solid #133; }
+</style>
+
+<div class="inf-media">
+
+  <!-- Floating Buttons -->
+  <button id="infDrawerBtn">☰</button>
+  <button id="infMediaBtn">▶</button>
+
+  <!-- Drawer -->
+  <div id="infDrawer">
+    <h2 style="color:#29d9ff;">Media Catalog</h2>
+    <h3>Videos</h3><div id="infVidList"></div>
+    <h3>Audio</h3><div id="infAudList"></div>
+  </div>
+
+  <!-- Media Panel -->
+  <div id="infMediaPanel">
+    <h2>Media Player</h2>
+
+    <div id="infDropZone">Tap or Drop video/audio here</div>
+    <input id="infUpload" type="file" accept="video/*,audio/*" style="display:none">
+
+    <video id="infVideo" controls></video>
+    <audio id="infAudio" controls style="width:100%;display:none;"></audio>
+
+    <button id="infSaveBtn" style="display:none;">Save to Catalog</button>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const p = id => document.getElementById(id);
+
+  const panel = p("infMediaPanel");
+  const btn = p("infMediaBtn");
+  const drop = p("infDropZone");
+  const upload = p("infUpload");
+  const saveBtn = p("infSaveBtn");
+  const video = p("infVideo");
+  const audio = p("infAudio");
+  const drawerBtn = p("infDrawerBtn");
+  const drawer = p("infDrawer");
+  const listVid = p("infVidList");
+  const listAud = p("infAudList");
+
+  let store = JSON.parse(localStorage.getItem("inf_catalog")||"[]");
+  let current = null;
+
+  btn.onclick = ()=> panel.style.display = (panel.style.display==="none"||!panel.style.display)?"block":"none";
+  drawerBtn.onclick = ()=> drawer.classList.toggle("open");
+
+  function render(){
+    listVid.innerHTML=""; listAud.innerHTML="";
+    store.forEach(item=>{
+      const el=document.createElement("div");
+      el.className="inf-item"; el.textContent=item.name;
+      el.onclick=()=> loadMedia(item);
+      if(item.type.startsWith("video")) listVid.appendChild(el);
+      else listAud.appendChild(el);
+    });
+  }
+
+  function loadMedia(file){
+    current=file;
+    if(file.type.startsWith("video")){
+      video.style.display="block"; audio.style.display="none";
+      video.src=file.data;
+    } else {
+      audio.style.display="block"; video.style.display="none";
+      audio.src=file.data;
+    }
+  }
+
+  drop.onclick = ()=> upload.click();
+  drop.ondrop = e=>{
+    e.preventDefault(); readFile(e.dataTransfer.files[0]);
+  };
+  drop.ondragover = e=> e.preventDefault();
+  upload.onchange = ()=> readFile(upload.files[0]);
+
+  function readFile(file){
+    if(!file) return;
+    const rd = new FileReader();
+    rd.onload = ()=>{
+      const data = rd.result;
+      current = {name:file.name,type:file.type,data};
+      saveBtn.style.display="block";
+      loadMedia(current);
+    };
+    rd.readAsDataURL(file);
+  }
+
+  saveBtn.onclick = ()=>{
+    store.push(current);
+    localStorage.setItem("inf_catalog",JSON.stringify(store));
+    render();
+    saveBtn.style.display="none";
+  };
+
+  render();
+
+})();
+</script>
 </body>
 </html>
