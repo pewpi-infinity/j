@@ -16,16 +16,12 @@
       --danger: #ff5577;
       --success: #00ffa3;
       --wallet: #21ff9c;
-      --token-glow: rgba(0, 255, 163, 0.16);
       --token-pill: rgba(0, 255, 163, 0.08);
+      --token-glow: rgba(0, 255, 163, 0.16);
       --input-bg: #02041a;
     }
 
-    * {
-      box-sizing: border-box;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
-    }
+    * { box-sizing: border-box; font-family: system-ui, sans-serif; }
 
     body {
       margin: 0;
@@ -36,361 +32,139 @@
       justify-content: center;
     }
 
-    .shell {
-      width: 100%;
-      max-width: 960px;
-      padding: 20px 14px 32px;
-    }
+    .shell { width: 100%; max-width: 960px; padding: 20px 14px 32px; }
 
     header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      display: flex; justify-content: space-between; align-items: center;
       margin-bottom: 18px;
     }
 
-    .brand-line {
-      font-size: 13px;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--accent);
-    }
+    .brand-line { font-size: 13px; letter-spacing: 0.25em; color: var(--accent); text-transform: uppercase; }
+    .header-title { font-size: 24px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 4px; text-shadow: 0 0 16px rgba(41,217,255,0.65); }
 
-    .header-title {
-      font-size: 24px;
-      font-weight: 800;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      margin-top: 4px;
-      text-shadow: 0 0 16px rgba(41, 217, 255, 0.65);
-    }
-
-    .portal-link {
-      font-size: 13px;
-      color: var(--text-soft);
-      opacity: 0.9;
-    }
-
-    .portal-link span {
-      opacity: 0.85;
-    }
-
-    .portal-link::before {
-      content: "⧉ ";
-      opacity: 0.7;
-    }
+    .portal-link { font-size: 13px; color: var(--text-soft); opacity: 0.9; }
+    .portal-link::before { content: "⧉ "; opacity: 0.7; }
 
     .terminal-card {
       background: radial-gradient(circle at top left, #0b1630, #050b18 48%, #020811);
-      border-radius: 22px;
-      padding: 18px 14px 16px;
-      border: 1px solid rgba(45, 120, 210, 0.6);
-      box-shadow:
-        0 0 45px rgba(0, 0, 0, 0.7),
-        0 0 26px rgba(41, 217, 255, 0.4);
-      position: relative;
-      overflow: hidden;
+      border-radius: 22px; padding: 18px 14px 16px;
+      border: 1px solid rgba(45,120,210,0.6);
+      box-shadow: 0 0 45px rgba(0,0,0,0.7), 0 0 26px rgba(41,217,255,0.4);
+      position: relative; overflow: hidden;
     }
 
-    .terminal-card::before {
-      content: "";
-      position: absolute;
-      inset: -40%;
-      background:
-        radial-gradient(circle at 0 0, rgba(0, 255, 163, 0.06), transparent 58%),
-        radial-gradient(circle at 100% 100%, rgba(41, 217, 255, 0.08), transparent 55%);
-      opacity: 0.9;
-      pointer-events: none;
-    }
-
-    .terminal-inner {
-      position: relative;
-      z-index: 1;
-    }
+    .terminal-inner { position: relative; z-index: 1; }
 
     .button-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 14px;
-      justify-content: center;
+      display: flex; flex-wrap: wrap; gap: 10px;
+      margin-bottom: 14px; justify-content: center;
     }
 
     .pill-btn {
-      min-width: 120px;
-      padding: 9px 16px;
-      border-radius: 999px;
-      border: 1px solid rgba(104, 168, 255, 0.7);
+      min-width: 120px; padding: 9px 16px; border-radius: 999px;
+      border: 1px solid rgba(104,168,255,0.7);
       background: radial-gradient(circle at top, #07132b, #020712 70%);
-      color: var(--text-main);
-      font-size: 14px;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      font-weight: 600;
-      cursor: pointer;
-      outline: none;
-      position: relative;
+      color: var(--text-main); font-size: 14px;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      font-weight: 600; cursor: pointer; position: relative;
     }
+    .pill-btn.active { border-color: var(--accent); box-shadow: 0 0 16px rgba(41,217,255,0.7), inset 0 0 3px rgba(41,217,255,0.9); }
 
-    .pill-btn span.label {
-      position: relative;
-      z-index: 1;
-    }
-
-    .pill-btn::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background: radial-gradient(circle at top, rgba(41, 217, 255, 0.18), transparent 68%);
-      opacity: 0;
-      transition: opacity 0.15s ease-out;
-    }
-
-    .pill-btn:hover::before {
-      opacity: 1;
-    }
-
-    .pill-btn.active {
-      border-color: var(--accent);
-      box-shadow:
-        0 0 16px rgba(41, 217, 255, 0.7),
-        0 0 3px rgba(41, 217, 255, 0.9) inset;
-    }
-
-    .pill-btn.wallet {
-      border-color: var(--wallet);
-      color: var(--wallet);
-    }
-
-    .pill-btn.wallet span.label::before {
-      content: "∞ ";
-    }
-
-    .pill-btn.wallet-glow {
-      box-shadow:
-        0 0 18px rgba(0, 255, 163, 0.8),
-        0 0 3px rgba(0, 255, 163, 0.9) inset;
-      background: radial-gradient(circle at top, rgba(0, 255, 163, 0.22), #020712 70%);
-    }
+    .pill-btn.wallet { border-color: var(--wallet); color: var(--wallet); }
+    .pill-btn.wallet .label::before { content: "∞ "; }
 
     .status-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 13px;
-      color: var(--text-soft);
-      margin-bottom: 8px;
-      padding: 0 2px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 13px; color: var(--text-soft);
+      margin-bottom: 8px; padding: 0 2px;
     }
+    .status-row strong { color: var(--accent); }
 
-    .status-row strong {
-      color: var(--accent);
-    }
-
-    .token-readout {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 13px;
-    }
-
+    .token-readout { display: flex; align-items: center; gap: 4px; }
     .token-pill {
-      padding: 3px 9px;
-      border-radius: 999px;
-      border: 1px solid rgba(0, 255, 163, 0.7);
-      background: var(--token-pill);
-      color: var(--wallet);
-      font-weight: 600;
-      display: inline-flex;
-      align-items: baseline;
-      gap: 4px;
+      padding: 3px 9px; border-radius: 999px;
+      border: 1px solid rgba(0,255,163,0.7);
+      background: var(--token-pill); color: var(--wallet);
+      font-weight: 600; display: flex; align-items: baseline; gap: 4px;
     }
-
-    .token-pill small {
-      font-size: 11px;
-      color: var(--text-soft);
-      opacity: 0.85;
-    }
+    .token-pill small { font-size: 11px; color: var(--text-soft); opacity: 0.85; }
 
     .console {
-      margin-top: 6px;
-      border-radius: 16px;
-      border: 1px solid rgba(28, 77, 144, 0.9);
-      background: radial-gradient(circle at top left, #04081a, #02030d 55%, #000 100%);
-      min-height: 220px;
-      max-height: 360px;
-      overflow-y: auto;
-      padding: 10px 11px;
-      font-size: 13px;
-      line-height: 1.45;
-      box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.85);
+      margin-top: 6px; border-radius: 16px;
+      border: 1px solid rgba(28,77,144,0.9);
+      background: radial-gradient(circle at top left, #04081a, #02030d 55%, #000);
+      min-height: 220px; max-height: 360px;
+      padding: 10px 11px; line-height: 1.45;
+      overflow-y: auto; font-size: 13px;
+      box-shadow: inset 0 0 24px rgba(0,0,0,0.85);
     }
+    .console-line { margin-bottom: 3px; white-space: pre-wrap; }
+    .console-line.you { color: #7ef9ff; }
+    .console-line.ai { color: #ffda7c; }
+    .console-line.ai .ai-tag { color: #ff9cdc; }
+    .console-line.system { color: var(--text-soft); }
 
-    .console::-webkit-scrollbar {
-      width: 6px;
-    }
-    .console::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .console::-webkit-scrollbar-thumb {
-      background: rgba(60, 105, 170, 0.85);
-      border-radius: 999px;
-    }
-
-    .console-line {
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      margin-bottom: 3px;
-    }
-
-    .console-line.system {
-      color: var(--text-soft);
-    }
-
-    .console-line.you {
-      color: #7ef9ff;
-    }
-
-    .console-line.ai {
-      color: #ffda7c;
-    }
-
-    .console-line.ai span.ai-tag {
-      color: #ff9cdc;
-    }
-
-    .console-line token {
-      color: var(--wallet);
-      font-weight: 600;
-    }
-
-    .input-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .prompt {
-      color: var(--accent);
-      font-size: 22px;
-      padding-bottom: 4px;
-    }
+    .input-row { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
+    .prompt { color: var(--accent); font-size: 22px; padding-bottom: 4px; }
 
     .input-box {
-      flex: 1;
+      flex: 1; border-radius: 999px; padding: 7px 14px;
       background: radial-gradient(circle at top, #020722, var(--input-bg));
-      border-radius: 999px;
-      padding: 7px 14px;
-      border: 1px solid rgba(46, 117, 210, 0.85);
-      box-shadow:
-        0 0 12px rgba(41, 217, 255, 0.35),
-        inset 0 0 14px rgba(0, 0, 0, 0.9);
-      display: flex;
-      align-items: center;
+      border: 1px solid rgba(46,117,210,0.85);
+      box-shadow: 0 0 12px rgba(41,217,255,0.35), inset 0 0 14px rgba(0,0,0,0.9);
+      display: flex; align-items: center;
     }
-
-    .input-box input {
-      background: transparent;
-      border: none;
-      outline: none;
-      flex: 1;
-      color: var(--text-main);
-      font-size: 15px;
-    }
-
-    .input-box input::placeholder {
-      color: rgba(166, 189, 217, 0.7);
-    }
+    .input-box input { flex: 1; background: transparent; color: var(--text-main); border: none; outline: none; }
 
     .post-btn {
-      padding: 9px 22px;
+      padding: 9px 22px; border-radius: 999px;
       background: radial-gradient(circle at top, #00ffa3, #009a6b);
-      border-radius: 999px;
-      border: none;
-      color: #00120b;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      cursor: pointer;
-      box-shadow:
-        0 0 20px rgba(0, 255, 163, 0.8),
-        0 0 4px rgba(0, 0, 0, 0.8);
-    }
-
-    .post-btn:active {
-      transform: translateY(1px);
-      box-shadow:
-        0 0 12px rgba(0, 255, 163, 0.7),
-        0 0 3px rgba(0, 0, 0, 0.8);
+      border: none; color: #00120b; font-weight: 700;
+      text-transform: uppercase; cursor: pointer;
+      box-shadow: 0 0 20px rgba(0,255,163,0.8), 0 0 4px rgba(0,0,0,0.8);
     }
 
     .mode-toggle-row {
-      margin-top: 10px;
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
+      margin-top: 10px; display: flex; justify-content: flex-end; gap: 10px;
       font-size: 13px;
     }
-
     .mode-pill {
-      padding: 5px 13px;
-      border-radius: 999px;
-      border: 1px solid rgba(110, 160, 230, 0.85);
-      background: rgba(3, 10, 25, 0.9);
-      cursor: pointer;
+      padding: 5px 13px; border-radius: 999px;
+      border: 1px solid rgba(110,160,230,0.85);
+      background: rgba(3,10,25,0.9); cursor: pointer;
       color: var(--text-soft);
     }
-
-    .mode-pill.active {
-      border-color: var(--accent);
-      color: var(--accent);
-      box-shadow: 0 0 10px rgba(41, 217, 255, 0.7);
-    }
+    .mode-pill.active { border-color: var(--accent); color: var(--accent); }
 
     .footer-note {
-      margin-top: 14px;
-      font-size: 11px;
-      color: rgba(149, 175, 211, 0.82);
-      line-height: 1.5;
+      margin-top: 14px; font-size: 11px;
+      color: rgba(149,175,211,0.82); line-height: 1.5;
     }
+    .footer-note b { color: #ffd66b; }
 
-    .footer-note b {
-      color: #ffd66b;
+    /* SECRET PAT PANEL */
+    #pat-admin {
+      display:none;
+      position:fixed; bottom:20px; right:20px;
+      background:#000000cc;
+      padding:15px;
+      border-radius:12px;
+      border:1px solid #00aaff;
+      z-index:9999; width:260px; font-size:14px;
     }
-
-    @media (max-width: 600px) {
-      .header-title {
-        font-size: 18px;
-      }
-
-      .terminal-card {
-        padding: 16px 11px 14px;
-      }
-
-      .button-row {
-        gap: 7px;
-      }
-
-      .pill-btn {
-        min-width: 46%;
-        font-size: 12px;
-        padding: 7px 10px;
-      }
-
-      .console {
-        min-height: 190px;
-        max-height: 300px;
-      }
-
-      .post-btn {
-        padding: 8px 16px;
-        font-size: 13px;
-      }
+    #pat-admin input {
+      width:100%; padding:6px; border-radius:6px;
+      background:#0a0f22; color:#fff;
+      border:1px solid #1e6aff;
+    }
+    #pat-admin button {
+      margin-top:8px; width:100%; padding:8px;
+      background:#0af; color:#fff; border:0; border-radius:6px;
+      font-weight:bold;
     }
   </style>
 </head>
+
 <body>
   <div class="shell">
     <header>
@@ -404,15 +178,14 @@
     <main>
       <section class="terminal-card">
         <div class="terminal-inner">
+
           <div class="button-row">
             <button class="pill-btn active" data-mode-btn="conversate"><span class="label">Conversate</span></button>
             <button class="pill-btn" data-mode-btn="secret"><span class="label">Secret Encode</span></button>
             <button class="pill-btn" data-mode-btn="retrieve"><span class="label">Retrieve</span></button>
             <button class="pill-btn" data-mode-btn="builder"><span class="label">Builder</span></button>
             <button class="pill-btn" data-mode-btn="post"><span class="label">Post</span></button>
-            <button class="pill-btn wallet" id="walletBtn">
-              <span class="label">Wallet</span>
-            </button>
+            <button class="pill-btn wallet" id="walletBtn"><span class="label">Wallet</span></button>
           </div>
 
           <div class="status-row">
@@ -431,12 +204,7 @@
           <div class="input-row">
             <div class="prompt">&gt;</div>
             <div class="input-box">
-              <input
-                id="input"
-                type="text"
-                autocomplete="off"
-                placeholder="Hello Rogers..."
-              />
+              <input id="input" type="text" autocomplete="off" placeholder="Hello Rogers..." />
             </div>
             <button class="post-btn" id="postBtn">Post</button>
           </div>
@@ -447,44 +215,22 @@
           </div>
 
           <div class="footer-note">
-            Logs and conversations are written into the Octave script-space itself,
-            not just “local storage.” <b>Each token represents time, attention, and
-            build-energy inside Infinity.</b> Baseline: 1 token every 30 minutes,
-            max 48/day. Bigger jumps will attach later to real project work.
+            Logs and conversations are written into the Octave script-space itself, not just “local storage.”
+            <b>Tokens represent time, attention, and energy inside Infinity.</b>
           </div>
         </div>
       </section>
     </main>
   </div>
-  <script src="js/octave-core.js"></script>
-<!-- SECRET PAT ADMIN PANEL (HIDDEN) -->
-<div id="pat-admin" style="
-    display:none;
-    position:fixed;
-    bottom:20px;
-    right:20px;
-    background:#000000cc;
-    padding:15px;
-    border-radius:12px;
-    border:1px solid #00aaff;
-    z-index:9999;
-    width:260px;
-    font-size:14px;
-">
-    <div style="margin-bottom:8px; color:#0af;">
-        <strong>Admin: Set PAT</strong>
-    </div>
-    <input id="pat-input" 
-           type="password" 
-           placeholder="Paste PAT…" 
-           style="width:100%; padding:6px; margin-bottom:10px; border-radius:6px;">
-    <button onclick="savePAT()" style="
-        width:100%; padding:8px; border-radius:6px;
-        background:#0af; color:#fff; font-weight:bold; border:0;
-    ">
-        Save PAT
-    </button>
+
+  <!-- SECRET ADMIN PANEL -->
+  <div id="pat-admin">
+    <div style="margin-bottom:8px; color:#0af;"><strong>Admin: Set PAT</strong></div>
+    <input id="pat-input" type="password" placeholder="Paste PAT…" />
+    <button onclick="savePAT()">Save PAT</button>
     <div id="pat-status" style="color:#0f0; margin-top:6px;"></div>
-</div>
+  </div>
+
+  <script src="js/octave-core.js"></script>
 </body>
 </html>
