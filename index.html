@@ -339,5 +339,19 @@ function quantumSpiral(a,b,theta){
     return a * Math.exp(b * theta);
 }
 </script>
+<!-- MODULE 3: HYDROGEN API -->
+<script>
+class HydrogenDoorway {
+    constructor(){
+        this.spin=0;
+        this.saved=null;
+    }
+    open(){ this.spin=1; }
+    close(){ this.spin=0; }
+    store(data){ this.saved = JSON.stringify(data); }
+    release(){ return JSON.parse(this.saved || "null"); }
+    bind(v){ return new Vec(v.x*0.93, v.y*0.93, v.z*0.93, v.t*1.07); }
+}
+</script>
 </body>
 </html>
