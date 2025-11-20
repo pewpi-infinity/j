@@ -1,6 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
+<!-- MODULE 1: STYLE -->
+<style>
+    body {
+        background:#000;
+        color:#fff;
+        font-family:Arial;
+        margin:0;
+        overflow:hidden;
+    }
+
+    #editor {
+        display:grid;
+        grid-template-columns:repeat(32, 32px);
+        grid-template-rows:repeat(18, 32px);
+        width:1024px;
+        height:576px;
+        background:#111;
+        perspective:900px;
+        margin:20px auto;
+    }
+
+    .tile {
+        width:32px;
+        height:32px;
+        background-size:cover;
+        transform:rotateX(18deg);
+    }
+
+    #sidebar {
+        position:absolute;
+        right:0; top:0; bottom:0;
+        width:260px;
+        background:#0c0c0c;
+        padding:20px;
+        overflow-y:auto;
+        border-left:2px solid #222;
+    }
+
+    .button {
+        background:#0af;
+        padding:10px;
+        border-radius:6px;
+        text-align:center;
+        margin-bottom:12px;
+        cursor:pointer;
+        font-weight:bold;
+    }
+    .button:hover {
+        background:#08c;
+    }
+</style>
     <title>Infinity OS — Reactor + Mario Builder Engine</title>
 
     <style>
