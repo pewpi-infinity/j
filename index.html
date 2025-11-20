@@ -353,5 +353,14 @@ class HydrogenDoorway {
     bind(v){ return new Vec(v.x*0.93, v.y*0.93, v.z*0.93, v.t*1.07); }
 }
 </script>
+<!-- MODULE 4: STORAGE SYSTEM -->
+<script>
+function saveLevel(tiles){
+    localStorage.setItem("mario_level", JSON.stringify(tiles));
+}
+function loadLevel(){
+    return JSON.parse(localStorage.getItem("mario_level") || "[]");
+}
+</script>
 </body>
 </html>
