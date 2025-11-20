@@ -1,128 +1,108 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Infinity Mini Player Test</title>
+    <meta charset="UTF-8" />
+    <title>Infinity Viewer Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<style>
-body {
-  background: #020712;
-  margin: 0;
-}
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #f7faff;
+            color: #002b57;
+            text-align: center;
+        }
 
-/* Floating Mini Player Container */
-#miniPlayer {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 240px;
-  height: 135px;
-  background: #000;
-  border: 2px solid #00eaff;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 0 20px #00eaff99;
-  display: none;
-  z-index: 99999;
-}
+        .header {
+            background: #007bff;
+            padding: 20px 0;
+            color: white;
+            font-size: 26px;
+            font-weight: bold;
+        }
 
-/* Video inside the mini player */
-#miniVideo {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
+        .container {
+            margin-top: 40px;
+        }
 
-/* Resize handle */
-#resizeHandle {
-  position: absolute;
-  width: 22px;
-  height: 22px;
-  right: 0;
-  bottom: 0;
-  background: #00eaff;
-  border-top-left-radius: 8px;
-  cursor: se-resize;
-}
+        .btn {
+            display: block;
+            width: 80%;
+            max-width: 300px;
+            margin: 14px auto;
+            padding: 16px;
+            background: #ffffff;
+            border: 2px solid #007bff;
+            border-radius: 14px;
+            color: #007bff;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: 0.2s;
+        }
 
-/* Upload button */
-#uploadBtn {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  padding: 12px 16px;
-  background: #00eaff;
-  border-radius: 10px;
-  font-weight: bold;
-  color: #000;
-  border: none;
-}
-</style>
+        .btn:hover {
+            background: #007bff;
+            color: #ffffff;
+        }
+
+        footer {
+            margin-top: 40px;
+            color: #4e6a80;
+            font-size: 14px;
+        }
+    </style>
 </head>
+
 <body>
 
-<input type="file" id="uploadBtn" accept="video/*">
+    <div class="header">
+        Infinity Public Viewer
+    </div>
 
-<div id="miniPlayer">
-  <video id="miniVideo" autoplay controls playsinline></video>
-  <div id="resizeHandle"></div>
-</div>
+    <div class="container">
 
-<script>
-// Elements
-const player = document.getElementById("miniPlayer");
-const video = document.getElementById("miniVideo");
-const upload = document.getElementById("uploadBtn");
-const resize = document.getElementById("resizeHandle");
+        <!-- All buttons route ONLY to the protected viewer directory -->
+        <a class="btn" href="/system/portal/viewer_directory.os">
+            Open Viewer Directory
+        </a>
 
-// Load video
-upload.addEventListener("change", () => {
-  let file = upload.files[0];
-  if (!file) return;
+        <a class="btn" href="/system/portal/viewer_directory.os?token">
+            Token Viewer
+        </a>
 
-  video.src = URL.createObjectURL(file);
-  player.style.display = "block";
-});
+        <a class="btn" href="/system/portal/viewer_directory.os?cubeportal">
+            Cube Portal Viewer
+        </a>
 
-/* Dragging */
-let drag = false, dx = 0, dy = 0;
+        <a class="btn" href="/system/portal/viewer_directory.os?sandbox">
+            Sandbox Particle Viewer
+        </a>
 
-player.addEventListener("mousedown", e => {
-  drag = true;
-  dx = e.clientX - player.offsetLeft;
-  dy = e.clientY - player.offsetTop;
-});
+        <a class="btn" href="/system/portal/viewer_directory.os?hypercube">
+            Hypercube Display
+        </a>
 
-document.addEventListener("mousemove", e => {
-  if (!drag) return;
-  player.style.left = (e.clientX - dx) + "px";
-  player.style.top = (e.clientY - dy) + "px";
-  player.style.right = "auto";
-  player.style.bottom = "auto";
-});
+        <a class="btn" href="/system/portal/viewer_directory.os?missions">
+            Mission Viewer
+        </a>
 
-document.addEventListener("mouseup", () => drag = false);
+        <a class="btn" href="/system/portal/viewer_directory.os?tasks">
+            Task Viewer
+        </a>
 
-/* Resizing */
-let resizing = false, startW, startH, startX, startY;
+        <a class="btn" href="/system/portal/viewer_directory.os?market">
+            Marketplace Viewer
+        </a>
 
-resize.addEventListener("mousedown", e => {
-  e.stopPropagation();
-  resizing = true;
-  startW = player.offsetWidth;
-  startH = player.offsetHeight;
-  startX = e.clientX;
-  startY = e.clientY;
-});
+    </div>
 
-document.addEventListener("mousemove", e => {
-  if (!resizing) return;
-  player.style.width  = startW + (e.clientX - startX) + "px";
-  player.style.height = startH + (e.clientY - startY) + "px";
-});
-
-document.addEventListener("mouseup", () => resizing = false);
-</script>
+    <footer>
+        Protected by Infinity Shadow Gateway<br>
+        Backend Modules Are Not Accessible
+    </footer>
 
 </body>
 </html>
