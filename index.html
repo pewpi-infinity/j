@@ -325,6 +325,19 @@ tick();
 </div>
 
 <script type="module" src="editor.js"></script>
+<!-- MODULE 2: VECTOR ENGINE -->
+<script>
+class Vec {
+    constructor(x=0,y=0,z=0,t=0){
+        this.x=x; this.y=y; this.z=z; this.t=t;
+    }
+    add(v){ return new Vec(this.x+v.x,this.y+v.y,this.z+v.z,this.t+v.t); }
+    scale(k){ return new Vec(this.x*k,this.y*k,this.z*k,this.t*k); }
+}
 
+function quantumSpiral(a,b,theta){
+    return a * Math.exp(b * theta);
+}
+</script>
 </body>
 </html>
