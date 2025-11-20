@@ -362,5 +362,43 @@ function loadLevel(){
     return JSON.parse(localStorage.getItem("mario_level") || "[]");
 }
 </script>
+<!-- MODULE 5: MARIO BUILDER -->
+<script>
+let editor = document.getElementById("editor");
+let activeTile = "brick";
+let level = loadLevel();
+
+// Build grid
+for (let y = 0; y < 18; y++){
+    for (let x = 0; x < 32; x++){
+        let tile = document.createElement("div");
+        tile.className = "tile";
+        tile.dataset.x = x;
+        tile.dataset.y = y;
+
+        let saved = level.find(t => t.x==x && t.y==y);
+        if (saved) tile.style.backgroundImage = "url(tileset.png#" + saved.type + ")";
+
+        tile.onclick = () => {
+            tile.style.backgroundImage = "url(tileset.png#" + activeTile + ")";
+            let exists = level.find(t => t.x==x && t.y==y);
+            if (exists) exists.type = activeTile;
+            else level.push({x,y,type:activeTile});
+        };
+
+        editor.appendChild(tile);
+    }
+}
+
+// Buttons
+document.getElementById("brickBtn").onclick = () => activeTile = "brick";
+document.getElementById("warpBtn").onclick  = () => activeTile = "hydrogen_portal";
+document.getElementById("vecBtn").onclick   = () => activeTile = "vector_zone";
+
+document.getElementById("saveBtn").onclick = () => {
+    saveLevel(level);
+    alert("Saved Successfully!");
+};
+</script>
 </body>
 </html>
