@@ -101,29 +101,3 @@ document.getElementById("saveBtn").onclick = () => {
 
 </body>
 </html>
-
-cat << 'EOF' > index.html
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Infinity Reactor Engine</title>
-    <style>
-        body { background:#000; color:white; font-family:Arial; text-align:center; }
-        .ring { margin:20px auto; height:20px; border-radius:20px; background:#0af; }
-        #middle { background:#0df; }
-        #outer { background:#0ff; }
-    </style>
-</head>
-<body>
-
-<h1>Infinity Reactor Engine</h1>
-
-<div id="inner"  class="ring"></div>
-<div id="middle" class="ring"></div>
-<div id="outer"  class="ring"></div>
-
-<script type="module" src="main.js"></script>
-
-</body>
-</html>
-EOF
