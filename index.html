@@ -400,5 +400,26 @@ document.getElementById("saveBtn").onclick = () => {
     alert("Saved Successfully!");
 };
 </script>
+<!-- MODULE 6: REACTOR SPIRAL -->
+<div id="inner" class="ring" style="height:14px; background:#0af; border-radius:8px;"></div>
+<div id="middle" class="ring" style="height:14px; background:#0df; border-radius:8px;"></div>
+<div id="outer" class="ring" style="height:14px; background:#0ff; border-radius:8px;"></div>
+
+<script>
+let theta = 0;
+function reactorLoop(){
+    theta += 0.03;
+    let i = quantumSpiral(0.3,0.11,theta) * 200;
+    let m = quantumSpiral(0.5,0.08,theta) * 200;
+    let o = quantumSpiral(0.7,0.06,theta) * 200;
+
+    inner.style.width  = i + "px";
+    middle.style.width = m + "px";
+    outer.style.width  = o + "px";
+
+    requestAnimationFrame(reactorLoop);
+}
+reactorLoop();
+</script>
 </body>
 </html>
