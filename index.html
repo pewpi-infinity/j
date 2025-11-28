@@ -1,425 +1,238 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<!-- MODULE 1: STYLE -->
-<style>
+  <meta charset="UTF-8" />
+  <title>Infinity Octave OS — Terminal v1</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root {
+      --bg: #020712;
+      --panel: #050b18;
+      --border: #1b3d6b;
+      --accent: #29d9ff;
+      --text-main: #e9f4ff;
+      --text-soft: #a7c0e0;
+      --wallet: #21ff9c;
+    }
+
+    * { box-sizing: border-box; font-family: system-ui, sans-serif; }
     body {
-        background:#000;
-        color:#fff;
-        font-family:Arial;
-        margin:0;
-        overflow:hidden;
+      margin: 0;
+      background: radial-gradient(circle at top, #06142b 0, #020712 48%, #000 100%);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
     }
 
-    #editor {
-        display:grid;
-        grid-template-columns:repeat(32, 32px);
-        grid-template-rows:repeat(18, 32px);
-        width:1024px;
-        height:576px;
-        background:#111;
-        perspective:900px;
-        margin:20px auto;
+    .shell { width: 100%; max-width: 960px; padding: 20px 14px 32px; }
+
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .brand-line { font-size: 13px; color: var(--accent); letter-spacing: 0.25em; }
+    .header-title { font-size: 24px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+
+    .portal-link { font-size: 13px; color: var(--text-soft); }
+    .portal-link::before { content: "⧉ "; }
+
+    .terminal-card {
+      background: radial-gradient(circle at top left, #0b1630, #050b18 48%, #020811);
+      border-radius: 22px;
+      padding: 18px 14px;
+      border: 1px solid rgba(45,120,210,0.6);
+      box-shadow: 0 0 45px rgba(0,0,0,0.7);
     }
 
-    .tile {
-        width:32px;
-        height:32px;
-        background-size:cover;
-        transform:rotateX(18deg);
+    .button-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 16px; }
+    .pill-btn {
+      min-width: 120px; padding: 9px 16px;
+      background: rgba(5,15,30,0.85);
+      border: 1px solid rgba(104,168,255,0.6);
+      border-radius: 999px;
+      color: #dff3ff;
+      cursor: pointer;
+      font-size: 14px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .pill-btn.active { border-color: var(--accent); box-shadow: 0 0 12px var(--accent); }
+
+    .pill-btn.wallet { border-color: var(--wallet); color: var(--wallet); }
+    .pill-btn.wallet::before { content: "∞ "; }
+
+    .status-row {
+      display: flex; justify-content: space-between;
+      padding: 0 4px; margin-bottom: 10px;
+      font-size: 13px; color: var(--text-soft);
+    }
+    #modeLabel { color: var(--accent); }
+
+    .token-pill {
+      padding: 3px 8px; border-radius: 999px;
+      border: 1px solid #21ff9c;
+      background: rgba(0,255,163,0.12);
+      color: var(--wallet); font-weight: 600;
     }
 
-    #sidebar {
-        position:absolute;
-        right:0; top:0; bottom:0;
-        width:260px;
-        background:#0c0c0c;
-        padding:20px;
-        overflow-y:auto;
-        border-left:2px solid #222;
+    .console {
+      height: 260px;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(35,70,130,0.7);
+      border-radius: 14px;
+      overflow-y: auto;
+      padding: 10px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    .console-line { margin-bottom: 5px; }
+    .console-line.system { color: #93b7ff; }
+    .console-line.you { color: #7ef9ff; }
+    .console-line.ai { color: #ffd997; }
+
+    .input-row { display: flex; gap: 8px; align-items: center; }
+    .input-box {
+      flex: 1;
+      background: rgba(0,10,30,0.8);
+      border: 1px solid rgba(40,110,200,0.8);
+      border-radius: 999px;
+      padding: 8px 14px;
+    }
+    .input-box input { background: transparent; border: none; color: var(--text-main); width: 100%; }
+
+    .post-btn {
+      padding: 9px 22px;
+      background: linear-gradient(to bottom, #21ff9c, #15996c);
+      border-radius: 999px;
+      border: none;
+      color: #00130a;
+      font-weight: 800;
+      text-transform: uppercase;
+      cursor: pointer;
     }
 
-    .button {
-        background:#0af;
-        padding:10px;
-        border-radius:6px;
-        text-align:center;
-        margin-bottom:12px;
-        cursor:pointer;
-        font-weight:bold;
+    /* Visitor Widget (small) */
+    #visitorBox {
+      position: fixed;
+      top: 18px; right: 18px;
+      width: 145px; height: 85px;
+      background: rgba(0,20,40,0.82);
+      border: 1px solid #29d9ff;
+      border-radius: 14px;
+      padding: 8px 10px;
+      font-size: 12px;
+      box-shadow: 0 0 16px rgba(41,217,255,0.4);
+      z-index: 999;
+      transition: all 0.2s ease;
+      overflow: hidden;
+      cursor: pointer;
     }
-    .button:hover {
-        background:#08c;
+
+    #visitorBox.expanded {
+      width: 300px; height: 220px; padding: 12px 14px;
     }
-</style>
-    <title>Infinity OS — Reactor + Mario Builder Engine</title>
 
-    <style>
-        body {
-            background:#000;
-            color:#fff;
-            font-family:Arial;
-            margin:0;
-            overflow:hidden;
-        }
-        h2 {
-            margin-top:40px;
-        }
-
-        /* ====================
-           SHARED PANEL STYLES
-        ===================== */
-        .module {
-            padding:20px;
-            border-bottom:2px solid #222;
-        }
-
-        /* ====================
-           REACTOR VISUAL
-        ===================== */
-        .ring {
-            margin:10px auto;
-            height:20px;
-            background:#0af;
-            border-radius:20px;
-            transition:width 0.08s linear;
-        }
-        #middle { background:#0df; }
-        #outer { background:#0ff; }
-
-        /* ====================
-            MARIO BUILDER 3D GRID
-        ===================== */
-        #editor {
-            display:grid;
-            grid-template-columns:repeat(32, 32px);
-            grid-template-rows:repeat(18, 32px);
-            width:990px;
-            height:580px;
-            background:#111;
-            perspective:900px;
-            margin:auto;
-            transform:translateY(20px);
-        }
-        .tile {
-            width:32px;
-            height:32px;
-            background-size:cover;
-            transform:rotateX(18deg);
-        }
-
-        #sidebar {
-            width:260px;
-            position:absolute;
-            right:0;
-            top:0;
-            bottom:0;
-            background:#0b0b0b;
-            padding:20px;
-            border-left:2px solid #222;
-            overflow:auto;
-        }
-        .btn {
-            background:#0af;
-            padding:12px;
-            margin:12px 0;
-            border-radius:8px;
-            text-align:center;
-            cursor:pointer;
-            font-weight:bold;
-        }
-        .btn:hover {
-            background:#08c;
-        }
-    </style>
+    #visitorMap {
+      width: 100%;
+      height: 110px;
+      margin-top: 6px;
+      background: rgba(0,60,70,0.15);
+      border-radius: 10px;
+    }
+  </style>
 </head>
 
 <body>
+  <div class="shell">
+    <header>
+      <div>
+        <div class="brand-line">INFINITY OCTAVE OS</div>
+        <div class="header-title">Infinity Octave OS — Terminal v1</div>
+      </div>
+      <div class="portal-link"><span>∞ Infinity Portal</span></div>
+    </header>
 
-<!-- ============================================================
-     STEP 1 — INFINITY REACTOR SPIRAL RINGS VISUAL
-=============================================================== -->
-<div class="module">
-    <h2>Infinity Reactor</h2>
+    <main>
+      <section class="terminal-card">
+        <div class="button-row">
+          <button class="pill-btn active" data-mode-btn="conversate">Conversate</button>
+          <button class="pill-btn" data-mode-btn="secret">Secret Encode</button>
+          <button class="pill-btn" data-mode-btn="retrieve">Retrieve</button>
+          <button class="pill-btn" data-mode-btn="builder">Builder</button>
+          <button class="pill-btn" data-mode-btn="post">Post</button>
+          <button class="pill-btn wallet">Wallet</button>
+        </div>
 
-    <div id="inner" class="ring" style="width:10px;"></div>
-    <div id="middle" class="ring" style="width:20px;"></div>
-    <div id="outer" class="ring" style="width:30px;"></div>
-</div>
+        <div class="status-row">
+          <span>Mode: <strong id="modeLabel">Conversate</strong></span>
+          <span class="token-pill"><span id="tokenCount">10</span> INF</span>
+        </div>
 
+        <div class="console" id="console"></div>
 
-<!-- ============================================================
-     STEP 2 — VECTOR ENGINE
-=============================================================== -->
-<script>
-class Vec {
-    constructor(x=0,y=0,z=0,t=0){
-        this.x=x; this.y=y; this.z=z; this.t=t;
-    }
-    add(v){ return new Vec(this.x+v.x,this.y+v.y,this.z+v.z,this.t+v.t); }
-    scale(k){ return new Vec(this.x*k,this.y*k,this.z*k,this.t*k); }
-    mag(){ return Math.sqrt(this.x**2+this.y**2+this.z**2+this.t**2); }
-}
+        <div class="input-row">
+          <div class="input-box">
+            <input id="input" placeholder="Hello Rogers..." autocomplete="off" />
+          </div>
+          <button class="post-btn" id="postBtn">Post</button>
+        </div>
 
-function quantumSpiral(a,b,theta){
-    return a * Math.exp(b * theta);
-}
-</script>
+      </section>
+    </main>
+  </div>
 
+  <!-- Core Systems -->
+  <script src="js/octave-core.js"></script>
+  <script src="token-engine.js"></script>
+  <script src="core-writer.js"></script>
+  <script src="module_ip_login.js"></script>
 
-<!-- ============================================================
-     STEP 3 — HYDROGEN API
-=============================================================== -->
-<script>
-class HydrogenDoorway {
-    constructor(){
-        this.spin=0;
-        this.storage=null;
-    }
-    open(){ this.spin=1; }
-    close(){ this.spin=0; }
-    store(data){ this.storage = JSON.stringify(data); }
-    release(){ return JSON.parse(this.storage || "null"); }
-    bind(v){ return new Vec(v.x*0.93, v.y*0.93, v.z*0.93, v.t*1.07); }
-}
-</script>
+  <!-- Expansion Modules -->
+  <script src="module_music_player.js"></script>
+  <script src="module_video_panel.js"></script>
+  <script src="module_equation_lab.js"></script>
+  <script src="module_microapps_buttons.js"></script>
+  <script src="module_3d_engine.js"></script>
+  <script src="module_pay_advertise.js"></script>
 
+  <script>
+    /* Visitor Counter */
+    (async function(){
+      let count = Number(localStorage.getItem("infinity_page_views") || 0);
+      count++;
+      localStorage.setItem("infinity_page_views", count);
+      document.getElementById("viewCount").textContent = count;
 
-<!-- ============================================================
-     STEP 4 — GAME PLUG MODULE
-=============================================================== -->
-<script>
-class GamePlug {
-    constructor(){
-        this.tiles=[];
-        this.objects=[];
-    }
-    addTile(x,y,type){
-        this.tiles.push({x,y,type});
-    }
-    addPortal(x,y,dest){
-        this.objects.push({type:"hydrogen_portal",x,y,dest});
-    }
-    addVectorZone(x,y,w,h,vec){
-        this.objects.push({type:"vector_zone",x,y,w,h,vec});
-    }
-}
-</script>
+      async function getGeo(){
+        try { let r = await fetch("https://ipapi.co/json/"); return r.json(); }
+        catch { return null; }
+      }
 
+      const geo = await getGeo();
+      if(geo){
+        document.getElementById("visitorLoc").textContent =
+          ${geo.city}, ${geo.region}, ${geo.country_name};
+        drawDot(geo.latitude, geo.longitude);
+      }
 
-<!-- ============================================================
-     STEP 5 — STORAGE SYSTEM
-=============================================================== -->
-<script>
-function saveLevel(tiles){
-    localStorage.setItem("mario_level", JSON.stringify(tiles));
-}
-function loadLevel(){
-    return JSON.parse(localStorage.getItem("mario_level") || "[]");
-}
-</script>
+      function drawDot(lat, lon){
+        const c = document.getElementById("visitorMap");
+        const ctx = c.getContext("2d");
+        ctx.fillStyle = "#011";
+        ctx.fillRect(0,0,c.width,c.height);
+        let x = (lon + 180) * (c.width / 360);
+        let y = (90 - lat) * (c.height / 180);
+        ctx.beginPath();
+        ctx.arc(x,y,4,0,Math.PI*2);
+        ctx.fillStyle = "#29d9ff";
+        ctx.fill();
+      }
 
+      document.getElementById("visitorBox").addEventListener("click",()=>{
+        visitorBox.classList.toggle("expanded");
+      });
 
-<!-- ============================================================
-     STEP 6 — MARIO 3D BUILDER ENGINE (UI)
-=============================================================== -->
-
-<div class="module">
-    <h2>Mario 3D Builder</h2>
-
-    <div id="editor"></div>
-</div>
-
-<div id="sidebar">
-    <h2>MARIO BUILDER</h2>
-    <div class="btn" id="brickBtn">Brick</div>
-    <div class="btn" id="warpBtn">Hydrogen Portal</div>
-    <div class="btn" id="vecBtn">Vector Zone</div>
-    <hr style="border-color:#333">
-    <div class="btn" id="saveBtn">Save Level</div>
-</div>
-
-<script>
-let activeTile="brick";
-let level = loadLevel();
-
-// build 32×18 grid
-let editor = document.getElementById("editor");
-for (let y=0;y<18;y++){
-  for (let x=0;x<32;x++){
-      let d=document.createElement("div");
-      d.className="tile";
-      d.dataset.x=x;
-      d.dataset.y=y;
-
-      let saved = level.find(t=>t.x==x && t.y==y);
-      if (saved) d.style.backgroundImage="url(tileset.png#"+saved.type+")";
-
-      d.onclick = () => {
-          d.style.backgroundImage="url(tileset.png#"+activeTile+")";
-          let exist = level.find(t=>t.x==x && t.y==y);
-          if (exist) exist.type=activeTile;
-          else level.push({x,y,type:activeTile});
-      };
-
-      editor.appendChild(d);
-  }
-}
-
-// button actions
-brickBtn.onclick = ()=>activeTile="brick";
-warpBtn.onclick = ()=>activeTile="hydrogen_portal";
-vecBtn.onclick = ()=>activeTile="vector_zone";
-
-saveBtn.onclick = ()=>{
-    saveLevel(level);
-    alert("Saved!");
-};
-</script>
-
-
-<!-- ============================================================
-     STEP 7 — REACTOR LOOP (LIVE ANIMATION)
-=============================================================== -->
-<script>
-let theta = 0;
-
-function tick(){
-    theta += 0.03;
-
-    let inner = quantumSpiral(0.3,0.11,theta);
-    let middle = quantumSpiral(0.5,0.08,theta);
-    let outer = quantumSpiral(0.7,0.06,theta);
-
-    document.getElementById("inner").style.width = (inner*200)+"px";
-    document.getElementById("middle").style.width = (middle*200)+"px";
-    document.getElementById("outer").style.width = (outer*200)+"px";
-
-    requestAnimationFrame(tick);
-}
-tick();
-</script>
-
-</body>
-</html>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Infinity Mario 3D Editor</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<div id="editor"></div>
-
-<div id="sidebar">
-    <h2>3D Mario Builder</h2>
-
-    <div id="brickBtn" class="button">Brick Block</div>
-    <div id="warpBtn" class="button">Hydrogen Portal</div>
-    <div id="vecBtn" class="button">Vector Zone</div>
-
-    <hr style="border-color:#333">
-
-    <div id="saveBtn" class="button">Save Level</div>
-</div>
-
-<script type="module" src="editor.js"></script>
-<!-- MODULE 2: VECTOR ENGINE -->
-<script>
-class Vec {
-    constructor(x=0,y=0,z=0,t=0){
-        this.x=x; this.y=y; this.z=z; this.t=t;
-    }
-    add(v){ return new Vec(this.x+v.x,this.y+v.y,this.z+v.z,this.t+v.t); }
-    scale(k){ return new Vec(this.x*k,this.y*k,this.z*k,this.t*k); }
-}
-
-function quantumSpiral(a,b,theta){
-    return a * Math.exp(b * theta);
-}
-</script>
-<!-- MODULE 3: HYDROGEN API -->
-<script>
-class HydrogenDoorway {
-    constructor(){
-        this.spin=0;
-        this.saved=null;
-    }
-    open(){ this.spin=1; }
-    close(){ this.spin=0; }
-    store(data){ this.saved = JSON.stringify(data); }
-    release(){ return JSON.parse(this.saved || "null"); }
-    bind(v){ return new Vec(v.x*0.93, v.y*0.93, v.z*0.93, v.t*1.07); }
-}
-</script>
-<!-- MODULE 4: STORAGE SYSTEM -->
-<script>
-function saveLevel(tiles){
-    localStorage.setItem("mario_level", JSON.stringify(tiles));
-}
-function loadLevel(){
-    return JSON.parse(localStorage.getItem("mario_level") || "[]");
-}
-</script>
-<!-- MODULE 5: MARIO BUILDER -->
-<script>
-let editor = document.getElementById("editor");
-let activeTile = "brick";
-let level = loadLevel();
-
-// Build grid
-for (let y = 0; y < 18; y++){
-    for (let x = 0; x < 32; x++){
-        let tile = document.createElement("div");
-        tile.className = "tile";
-        tile.dataset.x = x;
-        tile.dataset.y = y;
-
-        let saved = level.find(t => t.x==x && t.y==y);
-        if (saved) tile.style.backgroundImage = "url(tileset.png#" + saved.type + ")";
-
-        tile.onclick = () => {
-            tile.style.backgroundImage = "url(tileset.png#" + activeTile + ")";
-            let exists = level.find(t => t.x==x && t.y==y);
-            if (exists) exists.type = activeTile;
-            else level.push({x,y,type:activeTile});
-        };
-
-        editor.appendChild(tile);
-    }
-}
-
-// Buttons
-document.getElementById("brickBtn").onclick = () => activeTile = "brick";
-document.getElementById("warpBtn").onclick  = () => activeTile = "hydrogen_portal";
-document.getElementById("vecBtn").onclick   = () => activeTile = "vector_zone";
-
-document.getElementById("saveBtn").onclick = () => {
-    saveLevel(level);
-    alert("Saved Successfully!");
-};
-</script>
-<!-- MODULE 6: REACTOR SPIRAL -->
-<div id="inner" class="ring" style="height:14px; background:#0af; border-radius:8px;"></div>
-<div id="middle" class="ring" style="height:14px; background:#0df; border-radius:8px;"></div>
-<div id="outer" class="ring" style="height:14px; background:#0ff; border-radius:8px;"></div>
-
-<script>
-let theta = 0;
-function reactorLoop(){
-    theta += 0.03;
-    let i = quantumSpiral(0.3,0.11,theta) * 200;
-    let m = quantumSpiral(0.5,0.08,theta) * 200;
-    let o = quantumSpiral(0.7,0.06,theta) * 200;
-
-    inner.style.width  = i + "px";
-    middle.style.width = m + "px";
-    outer.style.width  = o + "px";
-
-    requestAnimationFrame(reactorLoop);
-}
-reactorLoop();
-</script>
+    })();
+  </script>
+<script src="module_media_dock.js"></script>
 </body>
 </html>
