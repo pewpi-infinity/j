@@ -239,7 +239,7 @@ body:not(.pewpi-live)>*:not(#pewpi-gate){filter:blur(6px);pointer-events:none}
       document.getElementById("viewCount").textContent = count;
 
       async function getGeo(){
-        try { let r = await fetch("https://ipapi.co/json/"); return r.json(); }
+        try { let r = await /* ip lookup removed */; return r.json(); }
         catch { return null; }
       }
 
@@ -270,119 +270,52 @@ body:not(.pewpi-live)>*:not(#pewpi-gate){filter:blur(6px);pointer-events:none}
     })();
   </script>
 <script src="module_media_dock.js"></script>
-</body>
 <!-- C13B0_CHAT_WIDGET_BEGIN -->
 <style>
-  .c13b0-chatfab{position:fixed;right:18px;bottom:18px;z-index:99999;border-radius:999px;padding:12px 14px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.25);cursor:pointer;user-select:none}
-  .c13b0-chatpanel{position:fixed;right:18px;bottom:72px;width:min(520px,calc(100vw - 36px));height:min(560px,calc(100vh - 120px));z-index:99999;border-radius:18px;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.35);display:none}
-  .c13b0-chathead{padding:10px 12px;font-weight:800;display:flex;align-items:center;justify-content:space-between}
-  .c13b0-chatbody{height:calc(100% - 94px);overflow:auto;padding:10px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:13px}
+  .c13b0-chatfab{position:fixed;right:18px;bottom:18px;z-index:99999;border-radius:999px;padding:12px 14px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.25);cursor:pointer;user-select:none;background:rgba(0,0,0,.82);color:white}
+  .c13b0-chatpanel{position:fixed;right:18px;bottom:72px;width:min(520px,calc(100vw - 36px));height:min(560px,calc(100vh - 120px));z-index:99999;border-radius:18px;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.35);display:none;background:rgba(0,0,0,.90);color:white}
+  .c13b0-chathead{padding:10px 12px;font-weight:800;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.10)}
+  .c13b0-chatbody{height:calc(100% - 94px);overflow:auto;padding:10px 12px;font-family:monospace;font-size:13px}
   .c13b0-chatline{white-space:pre-wrap;margin:8px 0}
   .c13b0-chatbar{display:flex;gap:8px;padding:10px 12px;border-top:1px solid rgba(255,255,255,.10)}
-  .c13b0-chatin{flex:1;border-radius:12px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);outline:none}
-  .c13b0-chatbtn{border-radius:12px;padding:10px 12px;font-weight:800;border:0;cursor:pointer}
+  .c13b0-chatin{flex:1;border-radius:12px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);outline:none;background:rgba(255,255,255,.06);color:white}
+  .c13b0-chatbtn{border-radius:12px;padding:10px 12px;font-weight:800;border:0;cursor:pointer;background:rgba(255,255,255,.14);color:white}
 </style>
-
-<div id="c13b0_chat_fab" class="c13b0-chatfab">🧱💬🧱 CHAT</div>
-
-<div id="c13b0_chat_panel" class="c13b0-chatpanel" role="dialog" aria-label="C13B0 Chat">
-  <div class="c13b0-chathead">
-    <div>🧱💬🧱 Repo Terminal</div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <small id="c13b0_chat_repo" style="opacity:.8">repo: (auto)</small>
-      <button id="c13b0_chat_close" class="c13b0-chatbtn">✕</button>
-    </div>
-  </div>
-  <div id="c13b0_chat_body" class="c13b0-chatbody"></div>
+<div class="c13b0-chatfab" id="c13b0_fab">🧱💬🧱 CHAT</div>
+<div class="c13b0-chatpanel" id="c13b0_panel" role="dialog">
+  <div class="c13b0-chathead"><div>🧱💬🧱 Rogers Terminal</div><button class="c13b0-chatbtn" id="c13b0_close">✕</button></div>
+  <div class="c13b0-chatbody" id="c13b0_body"></div>
   <div class="c13b0-chatbar">
-    <input id="c13b0_chat_in" class="c13b0-chatin" placeholder="Ask this repo... (returns tokenized answer)" />
-    <button id="c13b0_chat_send" class="c13b0-chatbtn">SEND</button>
+    <input class="c13b0-chatin" id="c13b0_in" placeholder="Ask Rogers... (front-end intelligence)"/>
+    <button class="c13b0-chatbtn" id="c13b0_send">SEND</button>
   </div>
 </div>
-
 <script>
 (function(){
-  // Theme: tries to inherit page colors; keeps your design intact.
-  const fab = document.getElementById("c13b0_chat_fab");
-  const panel = document.getElementById("c13b0_chat_panel");
-  const body = document.getElementById("c13b0_chat_body");
-  const input = document.getElementById("c13b0_chat_in");
-  const send = document.getElementById("c13b0_chat_send");
-  const close = document.getElementById("c13b0_chat_close");
-  const repoLabel = document.getElementById("c13b0_chat_repo");
-
-  const repo = (location.pathname.split("/")[1] || "").trim(); // for org pages it’s the repo root on pages
-  repoLabel.textContent = "repo: " + (repo || "(root)");
-
-  // Minimal styling decisions; avoid fighting your CSS
-  fab.style.background = "rgba(0,0,0,.82)";
-  fab.style.color = "white";
-  panel.style.background = "rgba(0,0,0,.90)";
-  panel.style.color = "white";
-  document.querySelector(".c13b0-chathead").style.borderBottom = "1px solid rgba(255,255,255,.10)";
-  input.style.background = "rgba(255,255,255,.06)";
-  input.style.color = "white";
-  send.style.background = "rgba(255,255,255,.14)";
-  send.style.color = "white";
-  close.style.background = "rgba(255,255,255,.14)";
-  close.style.color = "white";
-
-  function line(txt){
-    const div=document.createElement("div");
-    div.className="c13b0-chatline";
-    div.textContent=txt;
-    body.appendChild(div);
-    body.scrollTop = body.scrollHeight;
-  }
-
-  function open(){ panel.style.display="block"; input.focus(); }
-  function shut(){ panel.style.display="none"; }
-
-  fab.addEventListener("click", open);
-  close.addEventListener("click", shut);
-  window.addEventListener("click",(e)=>{
-    if(panel.style.display==="block"){
-      // click outside closes
-      if(!panel.contains(e.target) && e.target!==fab) shut();
-    }
-  });
-
-  async function ask(){
-    const q=(input.value||"").trim();
-    if(!q) return;
-
-    line("> " + q);
-    input.value="";
-
-    // Router endpoint (you’ll create it in your router repo)
-    // expected response: { ok:true, repo:"x", answer:"...", token:{id:"...", value:"...", type:"..."} }
-    try{
-      const res = await fetch("/router/ask", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({ repo, query:q, t: Date.now() })
-      });
-      const data = await res.json();
-      if(!data || !data.ok){
-        line("⚠️ Router error: " + (data && data.error ? data.error : "unknown"));
-        return;
-      }
-      if(data.answer) line(data.answer);
-      if(data.token){
-        line("🧱🟡🧱 TOKEN → " + JSON.stringify(data.token));
-      } else {
-        line("🧱📍🧱 no token returned");
-      }
-    }catch(err){
-      line("⚠️ fetch failed: " + err);
-    }
-  }
-
-  send.addEventListener("click", ask);
-  input.addEventListener("keydown",(e)=>{ if(e.key==="Enter") ask(); });
+  var fab=document.getElementById("c13b0_fab"),panel=document.getElementById("c13b0_panel"),
+    bd=document.getElementById("c13b0_body"),inp=document.getElementById("c13b0_in"),
+    snd=document.getElementById("c13b0_send"),cls=document.getElementById("c13b0_close");
+  function ln(t){var d=document.createElement("div");d.className="c13b0-chatline";d.textContent=t;bd.appendChild(d);bd.scrollTop=bd.scrollHeight;}
+  fab.onclick=function(){panel.style.display="block";inp.focus();ln("🧱 Rogers Terminal ready. Type help for commands.");};
+  cls.onclick=function(){panel.style.display="none";};
+  var KB={jukebox:"Launch the Jukebox from the links on this page! Themes: Mario, Rock, Jazz, EDM, Classical, Hip-Hop. Internet Archive powered.",
+    mario:"Mario Bros content: animated terminal, jukebox with NES sounds, character guides.",
+    infinity:"The Infinity ecosystem spans 900+ repos. Crown Index is the master hub.",
+    crown:"Crown Index is the master navigation hub linking all spark repos and projects.",
+    spark:"Spark repos are specialized tools: Hub, Market, Portal, Terminal, Core, and 75+ more.",
+    token:"License tokens start at $1,111 and increase $1/day forever.",
+    mongoose:"Mongoose.OS provides firmware-level soul.intent for each repo.",
+    help:"Commands: jukebox, mario, infinity, crown, spark, token, mongoose, ecosystem, status",
+    ecosystem:"👑Crown 🌐Hub 💰Market ⚡Core 🧱Octave 🎮Mario 📡Relay 🔥Forge",
+    status:"All systems ONLINE. Connected to Crown Index. Front-end mode active."};
+  function rogers(q){var ql=q.toLowerCase();for(var k in KB){if(ql.indexOf(k)!==-1)return "🧱 "+KB[k];}return "🧱 Try: help, jukebox, infinity, spark, token, ecosystem";}
+  function ask(){var q=(inp.value||"").trim();if(!q)return;ln("> "+q);inp.value="";setTimeout(function(){ln(rogers(q));},120);}
+  snd.onclick=ask;inp.onkeydown=function(e){if(e.key==="Enter")ask();};
 })();
 </script>
 <!-- C13B0_CHAT_WIDGET_END -->
+</body>
+
 </html>
 <!-- C14_TOKEN_PANEL_START -->
 <div style="font-family:monospace;background:#0b0f14;color:#e6edf3;padding:16px;margin:16px 0">
